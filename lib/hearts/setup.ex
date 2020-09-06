@@ -1,12 +1,12 @@
 defmodule Setup do
 
-  def main() do
+  def main(scores) do
     hands = shuffleAndDeal() |> Enum.map(hands, fn x -> sortCards(x) end)
     twoClubs = ## find which hand has the 2 of Clubs
     nextPlayer = ## player after C2
     followingPlayer = ## player after nextPlayer
     lastPlayer = ## player after followingPlayer
-    [hands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer]
+    [hands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer, scores]
   end
 
   def shuffleAndDeal() do
