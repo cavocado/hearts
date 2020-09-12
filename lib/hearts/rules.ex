@@ -28,4 +28,10 @@ defmodule Rules do
 
   end
 
+  def noCardsLeft([[],[],[],[]]) do
+
+  end
+
+  def noCardsLeft(hands), do: false
+
 end

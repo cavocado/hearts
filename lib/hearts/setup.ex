@@ -9,14 +9,16 @@ defmodule Setup do
     [hands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer, scores]
   end
 
+  ## A = ten; B = jack; C = queen; D = king; E = Ace
+  ## For sorting purposes...
+
   def shuffleAndDeal() do
-    deck = for number <- '23456789TJQKA', suit <- 'CDHS', do: [suit,number]
+    deck = for number <- '23456789ABCDE', suit <- 'CDHS', do: [suit,number]
     deck |> Enum.shuffle |> Enum.chunk_every(13)
   end
 
   def sortCards(hand) do
-    shand = Enum.sort(hand)
-    ## not finished; closer but not quite
+    Enum.sort(hand)
   end
 
   defp twoClubs([["C2" | _tail], _player2, _player3, _player4]), do: 1
