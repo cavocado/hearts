@@ -28,10 +28,17 @@ defmodule Rules do
 
   end
 
-  def noCardsLeft([[],[],[],[]]) do
-
+  def noCardsLeft([[],[],[],[]], tricks, [p1Score, p2Score, p3Score, p4Score]) do
+    [newP1, newP2, newP3, newP4] = countHearts(tricks)
+    newScores = [p1Score + newP1, p2Score + newP2, p3Score + newP3, p4Score + newP4]
+    [newScores, Enum.map(newScores, fn x -> x >= 100 end)]
   end
 
-  def noCardsLeft(hands), do: false
+  def noCardsLeft(_hands, _tricks, _score), do: false
+
+  ## gets passed tricks
+  def countHearts(tricks) do
+    Enum.map(tricks, fn x -> Enum.count(x, fn y -> {:heart, _} or {:spade, :queen} end) end)
+  end
 
 end
