@@ -15,7 +15,7 @@ defmodule Rules do
       size == 3 -> player = third
       size == 4 -> player = fourth
     end
-    # Find the right hand
+    hand = findHand(player, hands)
     {qSuit, qNumber} = List.last(tail)
     cond do
       suit == qSuit -> true
@@ -25,6 +25,11 @@ defmodule Rules do
       _ -> false
     end
   end
+
+  def findHand(1, [p1Hand, _p2Hand, _p3Hand, _p4Hand]) do: p1Hand
+  def findHand(2, [_p1Hand, p2Hand, _p3Hand, _p4Hand]) do: p2Hand
+  def findHand(3, [_p1Hand, _p2Hand, p3Hand, _p4Hand]) do: p3Hand
+  def findHand(4, [_p1Hand, _p2Hand, _p3Hand, p4Hand]) do: p4Hand
 
   def haveSuit(hand, suit) do
     cond do
@@ -42,8 +47,8 @@ defmodule Rules do
     end
   end
 
-  def largestCard([1c, 2c, 3c, 4c]) do
-    ##return the largest card
+  def largestCard([{1suit, 1number}, {2suit, 2number}, {3suit, 3number}, {4suit, 4number}]) do
+
   end
 
   def playerWithHighCard(bigCard, [bigCard | _tail], [player | _tail]), do: player
@@ -51,16 +56,32 @@ defmodule Rules do
   def playerWithHighCard(bigCard, [_1c, _2c, bigCard, _4c], [_1p, _2p, player, _4p]), do: player
   def playerWithHighCard(bigCard, [_1c, _2c, _3c, bigCard], [_1p, _2p, _3p, player]), do: player
 
-  def wonTrick(highCard, playerHC, [hands, tricks, playedSoFar, isBroken, _1p, _2p, _3p, _4p, scores]) do
-
+  def wonTrick(highCard, playerHC, [hands, [p1, p2, p3, p4], playedSoFar, isBroken, _1p, _2p, _3p, _4p, scores]) do
+    cond do
+      playerHC == 1 -> p1 ++ playedSoFar
+      playerHC == 2 -> p2 ++ playedSoFar
+      playerHC == 3 -> p3 ++ playedSoFar
+      playerHC == 4 -> p4 ++ playedSoFar
+    end
   end
 
   def noCardsLeft([[],[],[],[]], tricks, [p1Score, p2Score, p3Score, p4Score]) do
     [newP1, newP2, newP3, newP4] = countHearts(tricks)
     [queen1, queen2, queen3, queen4] = coutQueen(tricks)
-    newScores = [p1Score + newP1 + queen1, p2Score + newP2 + queen2, p3Score + newP3 + queen3, p4Score + newP4 + queen4]
-    # If one person got all
-    [newScores, Enum.map(newScores, fn x -> x >= 100 end)]
+    cond do
+      newP1 + queen1 == 26 -> [p1Score, p2Score + 26, p3Score + 26, p4Score + 26]
+      newP2 + queen2 == 26 -> [p1Score + 26, p2Score, p3Score + 26, p4Score + 26]
+      newP3 + queen3 == 26 -> [p1Score + 26, p2Score + 26, p3Score, p4Score + 25]
+      newP4 + queen4 == 26 -> [p1Score + 26, p2Score + 26, p3Score + 26, p4Score]
+      _ -> [p1Score + newP1 + queen1, p2Score + newP2 + queen2, p3Score + newP3 + queen3, p4Score + newP4 + queen4]
+    end
+  end
+
+  def endGame?(scores) do
+    cond do
+      Enum.count(scores, fn x -> x >= 100 end) > 0 -> true
+      _ -> false
+    end
   end
 
   def noCardsLeft(_hands, _tricks, _score), do: false
