@@ -1,11 +1,26 @@
 defmodule Rules do
 
-  def ruleCheck([hands, tricks, playedSoFar, isBroken, 1p, 2p, 3p, 4p, scores]) do
-
+  def ruleCheck([hands, tricks, playedSoFar, isBroken, 1p, 2p, 3p, 4p, scores, roundNumber, roundOver]) do
+    sizePlayedSoFar = Enum.count(playedSoFar)
+    cond do
+      sizePlayedSoFar > 1 -> fineSuit = okSuit(hands, playedSoFar, [1p, 2p, 3p, 4p], isBroken)
+      sizePlayedSoFar = 1 -> fineSuit = heartsOk(findHand(1, hands), playedSoFar, isBroken)
+    end
+    # handle if a suit was not ok to play
+    cond do
+      sizePlayedSoFar = 4 -> bigCard = largestCard(playedSoFar)
+      _ -> [hands, tricks, playedSoFar, isBroken, 2p, 3p, 4p, 1p, scores, roundNumber, false]
+    end
+    whichPlayer = playerWithHighCard(bigCard, playedSoFar, [1p, 2p, 3p, 4p])
+    secPlayer = (whichPlayer + 1) % 4 + 1
+    thrPlayer = (whichPlayer + 2) % 4 + 1
+    forPlayer = (whichPlayer + 3) % 4 + 1
+    newTricks = wonTrick(bigCard, whichPlayer, tricks, playedSoFar)
+    cond do
+      hands == [[],[],[],[]] -> [hands, tricks, [], isBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
+      _ -> [hands, tricks, [], isBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+    end
   end
-
-  def everyonePlayed([first, second, third, fourth]), do: largestCard(first, second, third, fourth)
-  def everyonePlayed(playedCards), do: false
 
   def okSuit(hands, [{suit, number} | tail], [_first, second, third, fourth], isBroken) do
     correctSuit = suit
@@ -48,7 +63,8 @@ defmodule Rules do
   end
 
   def largestCard([{1suit, 1number}, {2suit, 2number}, {3suit, 3number}, {4suit, 4number}]) do
-
+    suit = 1suit
+    # work on this
   end
 
   def playerWithHighCard(bigCard, [bigCard | _tail], [player | _tail]), do: player
@@ -56,18 +72,18 @@ defmodule Rules do
   def playerWithHighCard(bigCard, [_1c, _2c, bigCard, _4c], [_1p, _2p, player, _4p]), do: player
   def playerWithHighCard(bigCard, [_1c, _2c, _3c, bigCard], [_1p, _2p, _3p, player]), do: player
 
-  def wonTrick(highCard, playerHC, [hands, [p1, p2, p3, p4], playedSoFar, isBroken, _1p, _2p, _3p, _4p, scores]) do
+  def wonTrick(highCard, playerHC, [p1, p2, p3, p4], playedSoFar) do
     cond do
-      playerHC == 1 -> p1 ++ playedSoFar
-      playerHC == 2 -> p2 ++ playedSoFar
-      playerHC == 3 -> p3 ++ playedSoFar
-      playerHC == 4 -> p4 ++ playedSoFar
+      playerHC == 1 -> [p1 ++ playedSoFar, p2, p3, p4]
+      playerHC == 2 -> [p1, p2 ++ playedSoFar, p3, p4]
+      playerHC == 3 -> [p1, p2, p3 ++ playedSoFar, p4]
+      playerHC == 4 -> [p1, p2, p3, p4 ++ playedSoFar]
     end
   end
 
-  def noCardsLeft([[],[],[],[]], tricks, [p1Score, p2Score, p3Score, p4Score]) do
+  def newScores(tricks, [p1Score, p2Score, p3Score, p4Score]) do
     [newP1, newP2, newP3, newP4] = countHearts(tricks)
-    [queen1, queen2, queen3, queen4] = coutQueen(tricks)
+    [queen1, queen2, queen3, queen4] = countQueen(tricks)
     cond do
       newP1 + queen1 == 26 -> [p1Score, p2Score + 26, p3Score + 26, p4Score + 26]
       newP2 + queen2 == 26 -> [p1Score + 26, p2Score, p3Score + 26, p4Score + 26]
@@ -77,14 +93,13 @@ defmodule Rules do
     end
   end
 
+  # move endGame to file running the whole game
   def endGame?(scores) do
     cond do
       Enum.count(scores, fn x -> x >= 100 end) > 0 -> true
       _ -> false
     end
   end
-
-  def noCardsLeft(_hands, _tricks, _score), do: false
 
   def countHearts(tricks) do
     Enum.map(tricks, fn x -> Enum.count(x, fn y -> y == {:heart, _} end) end)
@@ -99,5 +114,4 @@ defmodule Rules do
       p4 == 1 -> [0, 0, 0, 13]
     end
   end
-
 end
