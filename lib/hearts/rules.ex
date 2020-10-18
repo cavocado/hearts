@@ -3,13 +3,16 @@ defmodule Rules do
   def ruleCheck([hands, tricks, playedSoFar, isBroken, 1p, 2p, 3p, 4p, scores, roundNumber, roundOver]) do
     sizePlayedSoFar = Enum.count(playedSoFar)
     cond do
-      sizePlayedSoFar > 1 -> fineSuit = okSuit(hands, playedSoFar, [1p, 2p, 3p, 4p], isBroken)
-      sizePlayedSoFar = 1 -> fineSuit = heartsOk(findHand(1, hands), playedSoFar, isBroken)
+      sizePlayedSoFar > 1 -> {fineSuit, newIsBroken} = okSuit(hands, playedSoFar, [1p, 2p, 3p, 4p], isBroken)
+      sizePlayedSoFar = 1 -> {fineSuit, newIsBroken} = heartsOk(findHand(1, hands), playedSoFar, isBroken)
     end
-    # handle if a suit was not ok to play
+    case fineSuit do
+      false -> [hands, tricks, Enum.drop(list, -1), isBroken, 1p, 2p, 3p, 4p, scores, roundNumber, roundOver]
+      true -> fineSuit = true
+    end
     cond do
       sizePlayedSoFar = 4 -> bigCard = largestCard(playedSoFar)
-      _ -> [hands, tricks, playedSoFar, isBroken, 2p, 3p, 4p, 1p, scores, roundNumber, false]
+      _ -> [hands, tricks, playedSoFar, newIsBroken, 2p, 3p, 4p, 1p, scores, roundNumber, false]
     end
     whichPlayer = playerWithHighCard(bigCard, playedSoFar, [1p, 2p, 3p, 4p])
     secPlayer = (whichPlayer + 1) % 4 + 1
@@ -17,8 +20,8 @@ defmodule Rules do
     forPlayer = (whichPlayer + 3) % 4 + 1
     newTricks = wonTrick(bigCard, whichPlayer, tricks, playedSoFar)
     cond do
-      hands == [[],[],[],[]] -> [hands, tricks, [], isBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
-      _ -> [hands, tricks, [], isBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+      hands == [[],[],[],[]] -> [hands, tricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
+      _ -> [hands, tricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
     end
   end
 
@@ -33,11 +36,11 @@ defmodule Rules do
     hand = findHand(player, hands)
     {qSuit, qNumber} = List.last(tail)
     cond do
-      suit == qSuit -> true
-      haveSuit(hand, suit) -> false
-      qSuit != :heart -> true
-      heartsOk(hand, [{suit, number} | tail], isBroken) -> true
-      _ -> false
+      suit == qSuit -> {true, isBroken}
+      haveSuit(hand, suit) -> {false, isBroken}
+      qSuit != :heart -> {true, isBroken}
+      heartsOk(hand, [{suit, number} | tail], isBroken) == {true, true} -> {true, true}
+      _ -> {false, isBroken}
     end
   end
 
@@ -55,10 +58,10 @@ defmodule Rules do
 
   def heartsOk(hand, [{suit, number} | _tail], isBroken) do
     cond do
-      isBroken -> true
-      Enum.count(hand, fn x -> x != {:heart, _} end) == 0 -> true
-      haveSuit(hand, suit) == false -> true
-      _ -> false
+      isBroken -> {true, true}
+      Enum.count(hand, fn x -> x != {:heart, _} end) == 0 -> {true, true}
+      haveSuit(hand, suit) == false -> {true, true}
+      _ -> {false, false}
     end
   end
 
