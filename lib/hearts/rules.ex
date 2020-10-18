@@ -67,7 +67,12 @@ defmodule Rules do
 
   def largestCard([{1suit, 1number}, {2suit, 2number}, {3suit, 3number}, {4suit, 4number}]) do
     suit = 1suit
-    # work on this
+    # get only first suit cards
+    map = %{:two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
+    map2 = %{2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
+    correspondingNumbers = Enum.map(list, fn {x, y} -> Map.fetch(map, y) end)
+    greatest = Enum.max(correspondingNumbers) # need more parameters?
+    Map.fetch(map2, greatest)
   end
 
   def playerWithHighCard(bigCard, [bigCard | _tail], [player | _tail]), do: player
