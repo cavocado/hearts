@@ -1,12 +1,13 @@
 defmodule Setup do
 
   def main(scores, roundNumber) do
-    hands = shuffleAndDeal() |> Enum.map(hands, fn x -> sortCards(x) end)
+    hands = shuffleAndDeal()
+    sortedHands = Enum.map(hands, fn x -> sortCards(x) end)
     twoClubs = twoClubs(hands)
-    nextPlayer = (twoClubs + 1) % 4
-    followingPlayer = (nextPlayer + 1) % 4
-    lastPlayer = (followingPlayer + 1) % 4
-    [hands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer, scores, roundNumber, false]
+    nextPlayer = rem(twoClubs + 1, 4)
+    followingPlayer = rem(nextPlayer + 1, 4)
+    lastPlayer = rem(followingPlayer + 1, 4)
+    [sortedHands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer, scores, roundNumber, false]
   end
 
   def shuffleAndDeal() do
@@ -14,9 +15,12 @@ defmodule Setup do
     deck |> Enum.shuffle |> Enum.chunk_every(13)
   end
 
-  # fix sort to work with atoms
   def sortCards(hand) do
-    Enum.sort(hand)
+    map = %{:two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
+    map2 = %{2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
+    newHand = Enum.map(hand, fn {x, y} -> {x, Map.fetch(map, y)} end)
+    sorted = Enum.sort(newHand)
+    Enum.map(sorted, fn {x, y} -> {x, Map.fetch(map2, y)} end)
   end
 
   defp twoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: 1
