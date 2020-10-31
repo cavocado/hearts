@@ -2,8 +2,8 @@ defmodule Rules do
 
   def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
     sizePlayedSoFar = Enum.count(playedSoFar)
-    newIsBroken = isBroken
-    bigCard = {}
+    #newIsBroken = isBroken
+    #bigCard = {}
     cond do
       sizePlayedSoFar > 1 -> {fineSuit, newIsBroken} = okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
       sizePlayedSoFar = 1 -> {fineSuit, newIsBroken} = heartsOk(findHand(1, hands), playedSoFar, isBroken)
