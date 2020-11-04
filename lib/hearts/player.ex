@@ -6,7 +6,7 @@ defmodule Player do
   end
 
   def cardsPlayed(playedCards) do
-    Enum.map(playedCards, fn {x, y} -> IO.puts("#{y} of #{x}s\n"))
+    Enum.map(playedCards, fn {x, y} -> IO.puts("#{y} of #{x}s\n") end)
   end
 
   def inValidPlay() do

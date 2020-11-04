@@ -2,21 +2,18 @@ defmodule Rules do
 
   def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
     sizePlayedSoFar = Enum.count(playedSoFar)
-    #newIsBroken = isBroken
-    #bigCard = {}
-    cond do
-      sizePlayedSoFar > 1 -> {fineSuit, newIsBroken} = okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
-      sizePlayedSoFar = 1 -> {fineSuit, newIsBroken} = heartsOk(findHand(1, hands), playedSoFar, isBroken)
-      sizePlayedSoFar < 1 -> {fineSuit, newIsBroken} = {true, isBroken}
+    {fineSuit, newIsBroken} = cond do
+      sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
+      sizePlayedSoFar = 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
+      sizePlayedSoFar < 1 -> {true, isBroken}
     end
-    cond do
-      fineSuit == false -> [hands, tricks, Enum.drop(list, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
-      fineSuit == true -> fineSuit = true
+    if not fineSuit do
+      [hands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     end
-    cond do
-      sizePlayedSoFar = 4 -> bigCard = largestCard(playedSoFar)
-      true -> [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
+    if sizePlayedSoFar < 4 do
+      [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
     end
+    bigCard = largestCard(playedSoFar)
     whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
     secPlayer = rem(whichPlayer + 1, 4) + 1
     thrPlayer = rem(whichPlayer + 2, 4) + 1
@@ -31,10 +28,10 @@ defmodule Rules do
   def okSuit(hands, [{suit, number} | tail], [_first, second, third, fourth], isBroken) do
     correctSuit = suit
     size = Enum.count(tail) + 1
-    cond do
-      size == 2 -> player = second
-      size == 3 -> player = third
-      size == 4 -> player = fourth
+    player = cond do
+      size == 2 -> second
+      size == 3 -> third
+      size == 4 -> fourth
     end
     hand = findHand(player, hands)
     {qSuit, qNumber} = List.last(tail)
