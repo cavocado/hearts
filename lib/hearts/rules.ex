@@ -15,9 +15,9 @@ defmodule Rules do
     end
     bigCard = largestCard(playedSoFar)
     whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
-    secPlayer = rem(whichPlayer + 1, 4) + 1
-    thrPlayer = rem(whichPlayer + 2, 4) + 1
-    forPlayer = rem(whichPlayer + 3, 4) + 1
+    secPlayer = rem(whichPlayer + 1, 4)
+    thrPlayer = rem(whichPlayer + 2, 4)
+    forPlayer = rem(whichPlayer + 3, 4)
     newTricks = wonTrick(bigCard, whichPlayer, tricks, playedSoFar)
     cond do
       hands == [[],[],[],[]] -> [hands, tricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
@@ -44,10 +44,10 @@ defmodule Rules do
     end
   end
 
-  def findHand(1, [p1Hand, _p2Hand, _p3Hand, _p4Hand]), do: p1Hand
-  def findHand(2, [_p1Hand, p2Hand, _p3Hand, _p4Hand]), do: p2Hand
-  def findHand(3, [_p1Hand, _p2Hand, p3Hand, _p4Hand]), do: p3Hand
-  def findHand(4, [_p1Hand, _p2Hand, _p3Hand, p4Hand]), do: p4Hand
+  def findHand(0, [p1Hand, _p2Hand, _p3Hand, _p4Hand]), do: p1Hand
+  def findHand(1, [_p1Hand, p2Hand, _p3Hand, _p4Hand]), do: p2Hand
+  def findHand(2, [_p1Hand, _p2Hand, p3Hand, _p4Hand]), do: p3Hand
+  def findHand(3, [_p1Hand, _p2Hand, _p3Hand, p4Hand]), do: p4Hand
 
   def haveSuit(hand, suit) do
     cond do
@@ -82,17 +82,17 @@ defmodule Rules do
     end
   end
 
-  def playerWithHighCard(bigCard, [bigCard | _tail], [player | _tail]), do: player
+  def playerWithHighCard(bigCard, [bigCard | _tail], [player | _tail1]), do: player
   def playerWithHighCard(bigCard, [_1c, bigCard, _3c, _4c], [_p1, player, _p3, _p4]), do: player
   def playerWithHighCard(bigCard, [_1c, _2c, bigCard, _4c], [_p1, _p2, player, _p4]), do: player
   def playerWithHighCard(bigCard, [_1c, _2c, _3c, bigCard], [_p1, _p2, _p3, player]), do: player
 
   def wonTrick(highCard, playerHC, [p1, p2, p3, p4], playedSoFar) do
     cond do
-      playerHC == 1 -> [p1 ++ playedSoFar, p2, p3, p4]
-      playerHC == 2 -> [p1, p2 ++ playedSoFar, p3, p4]
-      playerHC == 3 -> [p1, p2, p3 ++ playedSoFar, p4]
-      playerHC == 4 -> [p1, p2, p3, p4 ++ playedSoFar]
+      playerHC == 0 -> [p1 ++ playedSoFar, p2, p3, p4]
+      playerHC == 1 -> [p1, p2 ++ playedSoFar, p3, p4]
+      playerHC == 2 -> [p1, p2, p3 ++ playedSoFar, p4]
+      playerHC == 3 -> [p1, p2, p3, p4 ++ playedSoFar]
     end
   end
 

@@ -3,7 +3,7 @@ defmodule Setup do
   def main(scores, roundNumber) do
     hands = shuffleAndDeal()
     sortedHands = Enum.map(hands, fn x -> sortCards(x) end)
-    twoClubs = twoClubs(hands)
+    twoClubs = twoClubs(sortedHands)
     nextPlayer = rem(twoClubs + 1, 4)
     followingPlayer = rem(nextPlayer + 1, 4)
     lastPlayer = rem(followingPlayer + 1, 4)
@@ -16,16 +16,26 @@ defmodule Setup do
   end
 
   def sortCards(hand) do
-    map = %{:two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
-    map2 = %{2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
-    newHand = Enum.map(hand, fn {x, y} -> {x, Map.fetch(map, y)} end)
+    newHand = Enum.map(hand, fn a -> getNumber(a) end)
     sorted = Enum.sort(newHand)
-    Enum.map(sorted, fn {x, y} -> {x, Map.fetch(map2, y)} end)
+    Enum.map(sorted, fn b -> getAtom(b) end)
   end
 
-  defp twoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: 1
-  defp twoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: 2
-  defp twoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: 3
-  defp twoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: 4
+  defp twoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: 0
+  defp twoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: 1
+  defp twoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: 2
+  defp twoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: 3
+
+  def getNumber({x, y}) do
+    map = %{:two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
+    {:ok, num} = Map.fetch(map, y)
+    {x, num}
+  end
+
+  def getAtom({x, y}) do
+    map2 = %{2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
+    {:ok, atom} = Map.fetch(map2, y)
+    {x, atom}
+  end
 
 end
