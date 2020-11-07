@@ -18,15 +18,14 @@ defmodule Rules do
     secPlayer = rem(whichPlayer + 1, 4)
     thrPlayer = rem(whichPlayer + 2, 4)
     forPlayer = rem(whichPlayer + 3, 4)
-    newTricks = wonTrick(bigCard, whichPlayer, tricks, playedSoFar)
+    newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
     cond do
-      hands == [[],[],[],[]] -> [hands, tricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
-      true -> [hands, tricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+      hands == [[],[],[],[]] -> [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
+      true -> [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
     end
   end
 
   def okSuit(hands, [{suit, number} | tail], [_first, second, third, fourth], isBroken) do
-    correctSuit = suit
     size = Enum.count(tail) + 1
     player = cond do
       size == 2 -> second
@@ -34,7 +33,7 @@ defmodule Rules do
       size == 4 -> fourth
     end
     hand = findHand(player, hands)
-    {qSuit, qNumber} = List.last(tail)
+    {qSuit, _qNumber} = List.last(tail)
     cond do
       suit == qSuit -> {true, isBroken}
       haveSuit(hand, suit) -> {false, isBroken}
@@ -56,7 +55,7 @@ defmodule Rules do
     end
   end
 
-  def heartsOk(hand, [{suit, number} | _tail], isBroken) do
+  def heartsOk(hand, [{suit, _number} | _tail], isBroken) do
     cond do
       isBroken -> {true, true}
       Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 -> {true, true}
@@ -68,11 +67,21 @@ defmodule Rules do
   def largestCard([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}]) do
     suit = suit1
     numbers = Enum.map([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}], fn {x, y} -> checkSuit(x, y, suit) end)
-    map = %{:zero => 0, :two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
-    map2 = %{0 => :zero, 2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
-    correspondingNumbers = Enum.map(numbers, fn {x, y} -> Map.fetch(map, y) end)
+    correspondingNumbers = Enum.map(numbers, fn a -> getNumber(a) end)
     greatest = Enum.max(correspondingNumbers)
-    {suit, Map.fetch(map2, greatest)}
+    {suit, getAtom(greatest)}
+  end
+
+  def getNumber({_x, y}) do
+    map = %{:zero => 0, :two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
+    {:ok, num} = Map.fetch(map, y)
+    num
+  end
+
+  def getAtom(num) do
+    map2 = %{0 => :zero, 2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
+    {:ok, atom} = Map.fetch(map2, num)
+    atom
   end
 
   def checkSuit(suit, number, actualSuit) do
@@ -87,7 +96,7 @@ defmodule Rules do
   def playerWithHighCard(bigCard, [_1c, _2c, bigCard, _4c], [_p1, _p2, player, _p4]), do: player
   def playerWithHighCard(bigCard, [_1c, _2c, _3c, bigCard], [_p1, _p2, _p3, player]), do: player
 
-  def wonTrick(highCard, playerHC, [p1, p2, p3, p4], playedSoFar) do
+  def wonTrick(playerHC, [p1, p2, p3, p4], playedSoFar) do
     cond do
       playerHC == 0 -> [p1 ++ playedSoFar, p2, p3, p4]
       playerHC == 1 -> [p1, p2 ++ playedSoFar, p3, p4]
