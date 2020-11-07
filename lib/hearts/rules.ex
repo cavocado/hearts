@@ -4,24 +4,27 @@ defmodule Rules do
     sizePlayedSoFar = Enum.count(playedSoFar)
     {fineSuit, newIsBroken} = cond do
       sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
-      sizePlayedSoFar = 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
+      sizePlayedSoFar == 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
       sizePlayedSoFar < 1 -> {true, isBroken}
     end
     if not fineSuit do
       [hands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
-    end
-    if sizePlayedSoFar < 4 do
-      [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
-    end
-    bigCard = largestCard(playedSoFar)
-    whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
-    secPlayer = rem(whichPlayer + 1, 4)
-    thrPlayer = rem(whichPlayer + 2, 4)
-    forPlayer = rem(whichPlayer + 3, 4)
-    newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
-    cond do
-      hands == [[],[],[],[]] -> [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
-      true -> [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+    else
+      if sizePlayedSoFar < 4 do
+        [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
+      else
+        bigCard = largestCard(playedSoFar)
+        whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
+        secPlayer = rem(whichPlayer + 1, 4)
+        thrPlayer = rem(whichPlayer + 2, 4)
+        forPlayer = rem(whichPlayer + 3, 4)
+        newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
+        if hands == [[],[],[],[]] do
+          [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
+        else
+          [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+        end
+      end
     end
   end
 
