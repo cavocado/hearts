@@ -12,7 +12,9 @@ defmodule Hearts do
       :world
 
   """
-  def hello do
-    :world
+
+  def start() do
+    state = Setup.main(0, 0)
   end
+
 end
