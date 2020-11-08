@@ -9,7 +9,7 @@ defmodule Rules do
     end
     if not fineSuit do
       newHands = addCard(hands, List.last(playedSoFar), p1)
-      [hands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      [newHands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
       if sizePlayedSoFar < 4 do
         [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
