@@ -27,7 +27,8 @@ defmodule Player do
         |> removePassingCards(p3c1, p3c2, p3c3, 2)
         |> removePassingCards(p4c1, p4c2, p4c3, 3)
       finalHands = addPassingCards(newHands, type, [p1c1, p1c2, p1c3], [p2c1, p2c2, p2c3], [p3c1, p3c2, p3c3], [p4c1, p4c2, p4c3])
-      [finalHands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      sortedHands = Enum.map(finalHands, fn x -> Setup.sortCards(x) end)
+      [sortedHands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     end
   end
 
@@ -53,7 +54,7 @@ defmodule Player do
   end
 
   def getPassingCard([p1, p2, p3, p4], 0) do
-    card = IO.gets("Player 1: Pick a card to pass") |> String.trim() |> stringToCardValue()
+    card = IO.gets("Player 1: Pick a card to pass: ") |> String.trim() |> stringToCardValue()
     if isInHand(p1, card) do
       card
     else
@@ -63,7 +64,7 @@ defmodule Player do
   end
 
   def getPassingCard([p1, p2, p3, p4], 1) do
-    card = IO.gets("Player 2: Pick a card to pass") |> String.trim() |> stringToCardValue()
+    card = IO.gets("Player 2: Pick a card to pass: ") |> String.trim() |> stringToCardValue()
     if isInHand(p2, card) do
       card
     else
@@ -73,7 +74,7 @@ defmodule Player do
   end
 
   def getPassingCard([p1, p2, p3, p4], 2) do
-    card = IO.gets("Player 3: Pick a card to pass") |> String.trim() |> stringToCardValue()
+    card = IO.gets("Player 3: Pick a card to pass: ") |> String.trim() |> stringToCardValue()
     if isInHand(p3, card) do
       card
     else
@@ -83,7 +84,7 @@ defmodule Player do
   end
 
   def getPassingCard([p1, p2, p3, p4], 3) do
-    card = IO.gets("Player 4: Pick a card to pass") |> String.trim() |> stringToCardValue()
+    card = IO.gets("Player 4: Pick a card to pass: ") |> String.trim() |> stringToCardValue()
     if isInHand(p4, card) do
       card
     else
@@ -134,7 +135,7 @@ defmodule Player do
   end
 
   def stringToCardValue(card) do
-    values = String.split(card, " ", true)
+    values = String.split(card, " ")
     number = List.last(values)
     suit = List.first(values)
     {getSuitAtom(suit), getNumberAtom(number)}

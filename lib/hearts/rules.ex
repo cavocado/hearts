@@ -8,7 +8,7 @@ defmodule Rules do
       sizePlayedSoFar < 1 -> {true, isBroken}
     end
     if not fineSuit do
-      newHands = addCard(hands, List.last(playedSoFar), p1)
+      newHands = addCard(hands, List.last(playedSoFar), p1) |> Enum.map(fn x -> Setup.sortCards(x) end)
       [newHands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
       if sizePlayedSoFar < 4 do
