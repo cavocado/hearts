@@ -130,14 +130,6 @@ defmodule Rules do
     end
   end
 
-  # move endGame to file running the whole game
-  def endGame?(scores) do
-    cond do
-      Enum.count(scores, fn x -> x >= 100 end) > 0 -> true
-      true -> false
-    end
-  end
-
   def countHearts(tricks) do
     Enum.map(tricks, fn x -> Enum.count(x, fn {x, _y} -> x == :heart end) end)
   end
