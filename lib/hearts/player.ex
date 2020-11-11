@@ -105,7 +105,7 @@ defmodule Player do
     IO.inspect(hand)
     card = getCard() |> stringToCardValue()
     if isInHand(hand, card) do
-      newPlayedSoFar = playedSoFar ++ card
+      newPlayedSoFar = playedSoFar ++ [card]
       newHands = removeCard(hands, card, p1)
       [newHands, tricks, newPlayedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
@@ -116,10 +116,10 @@ defmodule Player do
 
   def removeCard([p1, p2, p3, p4], card, player) do
     cond do
-      player == 1 -> [List.delete(p1, card), p2, p3, p4]
-      player == 2 -> [p1, List.delete(p2, card), p3, p4]
-      player == 3 -> [p1, p2, List.delete(p3, card), p4]
-      player == 4 -> [p1, p2, p3, List.delete(p4, card)]
+      player == 0 -> [List.delete(p1, card), p2, p3, p4]
+      player == 1 -> [p1, List.delete(p2, card), p3, p4]
+      player == 2 -> [p1, p2, List.delete(p3, card), p4]
+      player == 3 -> [p1, p2, p3, List.delete(p4, card)]
     end
   end
 

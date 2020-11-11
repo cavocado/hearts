@@ -8,7 +8,8 @@ defmodule Rules do
       sizePlayedSoFar < 1 -> {true, isBroken}
     end
     if not fineSuit do
-      newHands = addCard(hands, List.last(playedSoFar), p1) |> Enum.map(fn x -> Setup.sortCards(x) end)
+      aHands = addCard(hands, List.last(playedSoFar), p1)
+      newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
       [newHands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
       if sizePlayedSoFar < 4 do
@@ -40,10 +41,10 @@ defmodule Rules do
 
   def addCard([p1, p2, p3, p4], card, player) do
     cond do
-      player == 1 -> [p1 ++ card, p2, p3, p4]
-      player == 2 -> [p1, p2 ++ card, p3, p4]
-      player == 3 -> [p1, p2, p3 ++ card, p4]
-      player == 4 -> [p1, p2, p3, p4 ++ card]
+      player == 0 -> [p1 ++ [card], p2, p3, p4]
+      player == 1 -> [p1, p2 ++ [card], p3, p4]
+      player == 2 -> [p1, p2, p3 ++ [card], p4]
+      player == 3 -> [p1, p2, p3, p4 ++ [card]]
     end
   end
 
@@ -79,6 +80,7 @@ defmodule Rules do
 
   def heartsOk(hand, [{suit, _number} | _tail], isBroken) do
     cond do
+      suit != :heart -> {true, isBroken}
       isBroken -> {true, true}
       Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 -> {true, true}
       haveSuit(hand, suit) == false -> {true, true}

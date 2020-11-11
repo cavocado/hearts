@@ -34,7 +34,8 @@ defmodule Hearts do
   def roundNumber([_h, _t, _p, _i, _p1, _p2, _p3, _p4, _s, _r, roundNumber]), do: roundNumber
 
   def game(state) do
-    newState = state |> Player.playCard() |> Rules.ruleCheck()
+    nextState = state |> Player.playCard()
+    newState = Rules.ruleCheck(nextState)
     if no_more_cards?(newState) do
       scores = score(newState)
       if endGame?(scores) do
