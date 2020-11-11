@@ -10,6 +10,7 @@ defmodule Player do
     if type == "hold" do
       [hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
+      IO.inspect(hands)
       p1c1 = getPassingCard(hands, 0)
       p1c2 = getPassingCard(hands, 0)
       p1c3 = getPassingCard(hands, 0)
@@ -94,13 +95,15 @@ defmodule Player do
   end
 
   def playCard([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
-    IO.puts("It's player #{p1}'s turn.\n")
+    IO.puts("It's player #{p1 + 1}'s turn.")
     if Enum.count(playedSoFar) > 0 do
       IO.puts("Here are the cards that have been played already")
       cardsPlayed(playedSoFar)
     end
-    card = getCard() |> stringToCardValue()
     hand = getHand(hands, p1)
+    IO.puts("Here is your hand:")
+    IO.inspect(hand)
+    card = getCard() |> stringToCardValue()
     if isInHand(hand, card) do
       newPlayedSoFar = playedSoFar ++ card
       newHands = removeCard(hands, card, p1)
@@ -126,7 +129,7 @@ defmodule Player do
   def getHand([_p1, _p2, _p3, hand], 3), do: hand
 
   def getCard() do
-    card = IO.gets("What card would you like to play?")
+    card = IO.gets("What card would you like to play? ")
     String.trim(card)
   end
 
@@ -153,8 +156,18 @@ defmodule Player do
     atom
   end
 
-  def isInHand(hand, card) do
-    Enum.find_value(hand, fn a -> a == card end)
+  def isInHand(hand, {suit, number}) do
+    card = List.keyfind(hand, suit, 0)
+    if card == nil do
+      false
+    else
+      if card == {suit, number} do
+        true
+      else
+        newHand = List.delete(hand, card)
+        isInHand(newHand, {suit, number})
+      end
+    end
   end
 
 end

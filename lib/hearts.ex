@@ -14,9 +14,18 @@ defmodule Hearts do
   """
   # Start game with start([0, 0, 0, 0], 0)
   def start(scores, roundNumber) do
-    state = Setup.main(scores, roundNumber) |> Player.passCards()
-    game(state)
+    [hands, tricks, playedSoFar, isBroken, _p1, _p2, _p3, _p4, score, roundNumber, roundOver] = Setup.main(scores, roundNumber) |> Player.passCards()
+    twoClubs = twoClubs(hands)
+    nextPlayer = rem(twoClubs + 1, 4)
+    followingPlayer = rem(nextPlayer + 1, 4)
+    lastPlayer = rem(followingPlayer + 1, 4)
+    game([hands, tricks, playedSoFar, isBroken, twoClubs, nextPlayer, followingPlayer, lastPlayer, score, roundNumber, roundOver])
   end
+
+  defp twoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: 0
+  defp twoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: 1
+  defp twoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: 2
+  defp twoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: 3
 
   def no_more_cards?([[[], [], [], []] | _rest]), do: true
   def no_more_cards?(_anything_else), do: false

@@ -1,7 +1,7 @@
 defmodule Rules do
 
   def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
-    sizePlayedSoFar = Enum.count(playedSoFar)
+    sizePlayedSoFar = getLength(playedSoFar, 0)
     {fineSuit, newIsBroken} = cond do
       sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
       sizePlayedSoFar == 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
@@ -26,6 +26,15 @@ defmodule Rules do
           [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
         end
       end
+    end
+  end
+
+  def getLength(list, count) do
+    if list == [] do
+      count
+    else
+      newList = List.delete_at(list, 0)
+      getLength(newList, count + 1)
     end
   end
 

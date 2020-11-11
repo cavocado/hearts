@@ -3,11 +3,7 @@ defmodule Setup do
   def main(scores, roundNumber) do
     hands = shuffleAndDeal()
     sortedHands = Enum.map(hands, fn x -> sortCards(x) end)
-    twoClubs = twoClubs(sortedHands)
-    nextPlayer = rem(twoClubs + 1, 4)
-    followingPlayer = rem(nextPlayer + 1, 4)
-    lastPlayer = rem(followingPlayer + 1, 4)
-    [sortedHands, [[],[],[],[]], [], false, twoClubs, nextPlayer, followingPlayer, lastPlayer, scores, roundNumber, false]
+    [sortedHands, [[],[],[],[]], [], false, 0, 1, 2, 3, scores, roundNumber, false]
   end
 
   def shuffleAndDeal() do
@@ -20,11 +16,6 @@ defmodule Setup do
     sorted = Enum.sort(newHand)
     Enum.map(sorted, fn b -> getAtom(b) end)
   end
-
-  defp twoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: 0
-  defp twoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: 1
-  defp twoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: 2
-  defp twoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: 3
 
   def getNumber({x, y}) do
     map = %{:two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
