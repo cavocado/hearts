@@ -2,10 +2,15 @@ defmodule Rules do
 
   def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
     sizePlayedSoFar = getLength(playedSoFar, 0)
-    {fineSuit, newIsBroken} = cond do
+    {fineSuit1, newIsBroken} = cond do
       sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
       sizePlayedSoFar == 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
       sizePlayedSoFar < 1 -> {true, isBroken}
+    end
+    fineSuit = if haveTwoClubs(hands) and List.first(playedSoFar) != {:club, :two} do
+      false
+    else
+      fineSuit1
     end
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
@@ -17,6 +22,7 @@ defmodule Rules do
       else
         bigCard = largestCard(playedSoFar)
         whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
+        IO.puts("Player #{whichPlayer + 1} won the trick.")
         secPlayer = rem(whichPlayer + 1, 4)
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
@@ -29,6 +35,12 @@ defmodule Rules do
       end
     end
   end
+
+  defp haveTwoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: true
+  defp haveTwoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: true
+  defp haveTwoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: true
+  defp haveTwoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: true
+  defp haveTwoClubs(_hands), do: false
 
   def getLength(list, count) do
     if list == [] do
