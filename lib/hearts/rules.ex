@@ -2,19 +2,15 @@ defmodule Rules do
 
   def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
     sizePlayedSoFar = getLength(playedSoFar, 0)
-    {fineSuit1, newIsBroken} = cond do
+    {fineSuit, newIsBroken} = cond do
       sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
-      sizePlayedSoFar == 1 -> heartsOk(findHand(1, hands), playedSoFar, isBroken)
+      sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
       sizePlayedSoFar < 1 -> {true, isBroken}
-    end
-    fineSuit = if haveTwoClubs(hands) and List.first(playedSoFar) != {:club, :two} do
-      false
-    else
-      fineSuit1
     end
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
+      IO.puts("You can't play that card.")
       [newHands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
     else
       if sizePlayedSoFar < 4 do
@@ -33,6 +29,18 @@ defmodule Rules do
           [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
         end
       end
+    end
+  end
+
+  def checkFirstCard(hands, [{suit, number}], isBroken, p1) do
+    hand = findHand(p1, hands)
+    cond do
+      haveTwoClubs(hands) and {suit, number} == {:club, :two} -> {true, isBroken}
+      haveTwoClubs(hands) -> {false, isBroken}
+      isBroken -> {true, true}
+      suit != :heart -> {true, isBroken}
+      Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 -> {true, true}
+      true -> false
     end
   end
 
@@ -85,15 +93,15 @@ defmodule Rules do
 
   def haveSuit(hand, suit) do
     cond do
-      Enum.count(hand, fn {x, _y} -> x != suit end) == 0 -> false
-      true -> true
+      Enum.count(hand, fn {x, _y} -> x == suit end) > 0 -> true
+      true -> false
     end
   end
 
-  def heartsOk(hand, [{suit, _number} | _tail], isBroken) do
+  def heartsOk(hand, [{suit, number} | _tail], isBroken) do
     cond do
-      suit != :heart -> {true, isBroken}
       isBroken -> {true, true}
+      {suit, number} == {:club, :two} -> {false, isBroken}
       Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 -> {true, true}
       haveSuit(hand, suit) == false -> {true, true}
       true -> {false, false}
