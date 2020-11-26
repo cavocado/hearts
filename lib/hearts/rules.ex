@@ -1,6 +1,14 @@
 defmodule Rules do
 
-  def ruleCheck([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
+  def ruleCheck(board) do
+    playedSoFar = board.playedSoFar
+    hands = board.hands
+    tricks = board.tricks
+    p1 = board.p1
+    p2 = board.p2
+    p3 = board.p3
+    p4 = board.p4
+    isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
     {fineSuit, newIsBroken} = cond do
       sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
@@ -11,10 +19,15 @@ defmodule Rules do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
       IO.puts("You can't play that card.")
-      [newHands, tricks, Enum.drop(playedSoFar, -1), isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      Board.changeH(board, newHands) |> Board.changeP(Enum.drop(playedSoFar, -1))
     else
+      newBoard = Board.changeB(board, newIsBroken)
       if sizePlayedSoFar < 4 do
-        [hands, tricks, playedSoFar, newIsBroken, p2, p3, p4, p1, scores, roundNumber, false]
+        Board.changeP1(newBoard, p2)
+        |> Board.changeP2(p3)
+        |> Board.changeP3(p4)
+        |> Board.changeP4(p1)
+        |> Board.changeRO(false)
       else
         bigCard = largestCard(playedSoFar)
         whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
@@ -22,11 +35,19 @@ defmodule Rules do
         secPlayer = rem(whichPlayer + 1, 4)
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
-        newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
+        newTricks = wonTrick(whichPlayer, newBoard.tricks, playedSoFar)
+        nextBoard = Board.changeT(newBoard, newTricks)
+        |> Board.changeP1(whichPlayer)
+        |> Board.changeP2(secPlayer)
+        |> Board.changeP3(thrPlayer)
+        |> Board.changeP4(forPlayer)
+        |> Board.changeP([])
         if hands == [[],[],[],[]] do
-          [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, newScores(tricks, scores), roundNumber, true]
+          scores = board.scores
+          Board.changeS(nextBoard, newScores(tricks, scores))
+          |> Board.changeRO(true)
         else
-          [hands, newTricks, [], newIsBroken, whichPlayer, secPlayer, thrPlayer, forPlayer, scores, roundNumber, false]
+          Board.changeRO(nextBoard, false)
         end
       end
     end

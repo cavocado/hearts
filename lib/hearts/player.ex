@@ -1,6 +1,7 @@
 defmodule Player do
 
-  def passCards([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
+  def passCards(board) do
+    roundNumber = board.roundNumber
     type = cond do
       rem(roundNumber, 4) == 0 -> "left"
       rem(roundNumber, 4) == 1 -> "right"
@@ -8,8 +9,9 @@ defmodule Player do
       rem(roundNumber, 4) == 3 -> "hold"
     end
     if type == "hold" do
-      [hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      board
     else
+      hands = board.hands
       IO.inspect(hands)
       p1c1 = getPassingCard(hands, 0)
       p1c2 = getPassingCard(hands, 0)
@@ -29,7 +31,7 @@ defmodule Player do
         |> removePassingCards(p4c1, p4c2, p4c3, 3)
       finalHands = addPassingCards(newHands, type, [p1c1, p1c2, p1c3], [p2c1, p2c2, p2c3], [p3c1, p3c2, p3c3], [p4c1, p4c2, p4c3])
       sortedHands = Enum.map(finalHands, fn x -> Setup.sortCards(x) end)
-      [sortedHands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      Board.changeH(board, sortedHands)
     end
   end
 
@@ -94,7 +96,10 @@ defmodule Player do
     end
   end
 
-  def playCard([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]) do
+  def playCard(board) do
+    p1 = board.p1
+    playedSoFar = board.playedSoFar
+    hands = board.hands
     IO.puts("It's player #{p1 + 1}'s turn.")
     if Enum.count(playedSoFar) > 0 do
       IO.puts("Here are the cards that have been played already")
@@ -107,10 +112,10 @@ defmodule Player do
     if isInHand(hand, card) do
       newPlayedSoFar = playedSoFar ++ [card]
       newHands = removeCard(hands, card, p1)
-      [newHands, tricks, newPlayedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver]
+      Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
     else
       IO.puts("You can't play that card.")
-      playCard([hands, tricks, playedSoFar, isBroken, p1, p2, p3, p4, scores, roundNumber, roundOver])
+      playCard(board)
     end
   end
 

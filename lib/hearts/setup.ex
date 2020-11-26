@@ -1,9 +1,12 @@
 defmodule Setup do
 
-  def main(scores, roundNumber) do
-    hands = shuffleAndDeal()
-    sortedHands = Enum.map(hands, fn x -> sortCards(x) end)
-    [sortedHands, [[],[],[],[]], [], false, 0, 1, 2, 3, scores, roundNumber, false]
+  def main(currentScores, currentRoundNumber) do
+    listHands = shuffleAndDeal()
+    sortedHands = Enum.map(listHands, fn x -> sortCards(x) end)
+    Board.new()
+    |> Board.changeS(currentScores)
+    |> Board.changeRN(currentRoundNumber)
+    |> Board.changeH(sortedHands)
   end
 
   def shuffleAndDeal() do
