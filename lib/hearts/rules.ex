@@ -30,12 +30,12 @@ defmodule Rules do
         |> Board.changeRO(false)
       else
         bigCard = largestCard(playedSoFar)
-        whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p1, p2, p3, p4])
+        whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p2, p3, p4, p1])
         IO.puts("Player #{whichPlayer + 1} won the trick.")
         secPlayer = rem(whichPlayer + 1, 4)
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
-        newTricks = wonTrick(whichPlayer, newBoard.tricks, playedSoFar)
+        newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
         nextBoard = Board.changeT(newBoard, newTricks)
         |> Board.changeP1(whichPlayer)
         |> Board.changeP2(secPlayer)
@@ -44,7 +44,7 @@ defmodule Rules do
         |> Board.changeP([])
         if hands == [[],[],[],[]] do
           scores = board.scores
-          Board.changeS(nextBoard, newScores(tricks, scores))
+          Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
         else
           Board.changeRO(nextBoard, false)
