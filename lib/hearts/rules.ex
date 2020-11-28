@@ -45,7 +45,7 @@ defmodule Rules do
         if hands == [[],[],[],[]] do
           scores = board.scores
           IO.puts("The new scores are ")
-          IO.inspect(scores)
+          IO.inspect(newScores(newTricks, scores))
           Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
         else
