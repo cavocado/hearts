@@ -11,7 +11,7 @@ defmodule Rules do
     isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
     {fineSuit, newIsBroken} = cond do
-      sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, [p1, p2, p3, p4], isBroken)
+      sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
       sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
       sizePlayedSoFar < 1 -> {true, isBroken}
     end
@@ -44,6 +44,7 @@ defmodule Rules do
         |> Board.changeP([])
         if hands == [[],[],[],[]] do
           scores = board.scores
+          IO.puts("The new scores are #{scores}")
           Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
         else
@@ -89,13 +90,8 @@ defmodule Rules do
     end
   end
 
-  def okSuit(hands, [{suit, number} | tail], [_first, second, third, fourth], isBroken) do
-    size = Enum.count(tail) + 1
-    player = cond do
-      size == 2 -> second
-      size == 3 -> third
-      size == 4 -> fourth
-    end
+  def okSuit(hands, [{suit, number} | tail], first, isBroken) do
+    player = first
     hand = findHand(player, hands)
     {qSuit, _qNumber} = List.last(tail)
     cond do
