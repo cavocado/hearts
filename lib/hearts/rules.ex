@@ -44,7 +44,8 @@ defmodule Rules do
         |> Board.changeP([])
         if hands == [[],[],[],[]] do
           scores = board.scores
-          IO.puts("The new scores are #{scores}")
+          IO.puts("The new scores are ")
+          IO.inspect(scores)
           Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
         else
@@ -62,7 +63,7 @@ defmodule Rules do
       isBroken -> {true, true}
       suit != :heart -> {true, isBroken}
       Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 -> {true, true}
-      true -> false
+      true -> {false, isBroken}
     end
   end
 
