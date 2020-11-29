@@ -108,14 +108,20 @@ defmodule Player do
     hand = getHand(hands, p1)
     IO.puts("Here is your hand:")
     IO.inspect(hand)
-    card = getCard() |> stringToCardValue()
-    if isInHand(hand, card) do
-      newPlayedSoFar = playedSoFar ++ [card]
-      newHands = removeCard(hands, card, p1)
-      Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
-    else
-      IO.puts("You can't play that card.")
+    {suit, number} = getCard() |> stringToCardValue()
+    card = {suit, number}
+    if (suit == false) || (number == false) do
+      IO.puts("Not a valid input. Try again.")
       playCard(board)
+    else
+      if isInHand(hand, card) do
+        newPlayedSoFar = playedSoFar ++ [card]
+        newHands = removeCard(hands, card, p1)
+        Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
+      else
+        IO.puts("You can't play that card.")
+        playCard(board)
+      end
     end
   end
 
@@ -151,14 +157,24 @@ defmodule Player do
 
   def getNumberAtom(num) do
     numberValues = %{"0" => :zero, "2" => :two, "3" => :three, "4" => :four, "5" => :five, "6" => :six, "7" => :seven, "8" => :eight, "9" => :nine, "10" => :ten, "jack" => :jack, "queen" => :queen, "king" => :king, "ace" => :ace}
-    {:ok, atom} = Map.fetch(numberValues, num)
-    atom
+    result = Map.fetch(numberValues, num)
+    if result == :error do
+      false
+    else
+      {:ok, number} = result
+      number
+    end
   end
 
   def getSuitAtom(suit) do
     suitValues = %{"diamonds" => :diamond, "clubs" => :club, "hearts" => :heart, "spades" => :spade}
-    {:ok, atom} = Map.fetch(suitValues, suit)
-    atom
+    result = Map.fetch(suitValues, suit)
+    if result == :error do
+      false
+    else
+      {:ok, asuit} = result
+      asuit
+    end
   end
 
   def isInHand(hand, {suit, number}) do

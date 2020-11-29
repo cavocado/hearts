@@ -36,12 +36,14 @@ defmodule Rules do
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
         newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
+        newIsBroken = haveQueenSpades(playedSoFar, isBroken)
         nextBoard = Board.changeT(newBoard, newTricks)
         |> Board.changeP1(whichPlayer)
         |> Board.changeP2(secPlayer)
         |> Board.changeP3(thrPlayer)
         |> Board.changeP4(forPlayer)
         |> Board.changeP([])
+        |> Board.changeB(newIsBroken)
         if hands == [[],[],[],[]] do
           scores = board.scores
           IO.puts("The new scores are ")
@@ -52,6 +54,13 @@ defmodule Rules do
           Board.changeRO(nextBoard, false)
         end
       end
+    end
+  end
+
+  def haveQueenSpades(playedSoFar, isBroken) do
+    cond do
+      Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) > 0 -> true
+      true -> isBroken
     end
   end
 
