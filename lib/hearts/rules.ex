@@ -32,6 +32,7 @@ defmodule Rules do
         bigCard = largestCard(playedSoFar)
         whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p2, p3, p4, p1])
         IO.puts("Player #{whichPlayer + 1} won the trick.")
+        printCardsPlayed(playedSoFar, [p2, p3, p4, p1])
         secPlayer = rem(whichPlayer + 1, 4)
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
@@ -55,6 +56,13 @@ defmodule Rules do
         end
       end
     end
+  end
+
+  def printCardsPlayed([{suit1, num1}, {suit2, num2}, {suit3, num3}, {suit4, num4}], [p1, p2, p3, p4]) do
+    IO.puts("Player #{p1 + 1} played the #{num1} of #{suit1}s")
+    IO.puts("Player #{p2 + 1} played the #{num2} of #{suit2}s")
+    IO.puts("Player #{p3 + 1} played the #{num3} of #{suit3}s")
+    IO.puts("Player #{p4 + 1} played the #{num4} of #{suit4}s")
   end
 
   def haveQueenSpades(playedSoFar, isBroken) do
