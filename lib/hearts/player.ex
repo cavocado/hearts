@@ -10,7 +10,7 @@ defmodule Player do
   end
 
   def getPassingCard(p1) do
-    card = IO.gets("Player 1: Pick a card to pass: ") |> String.trim() |> stringToCardValue()
+    card = IO.gets(IO.ANSI.red <> "Player 1: Pick a card to pass: " <> IO.ANSI.normal) |> String.trim() |> stringToCardValue()
     if isInHand(p1, card) do
       card
     else
@@ -23,9 +23,9 @@ defmodule Player do
     p1 = board.p1
     playedSoFar = board.playedSoFar
     hands = board.hands
-    IO.puts("It's player #{p1 + 1}'s turn.")
+    IO.puts(IO.ANSI.green <> "It's player #{p1 + 1}'s turn." <> IO.ANSI.normal)
     if Enum.count(playedSoFar) > 0 do
-      IO.puts("Here are the cards that have been played already")
+      IO.puts(IO.ANSI.light_blue <> "Here are the cards that have been played already" <> IO.ANSI.normal)
       cardsPlayed(playedSoFar)
     end
     hand = getHand(hands, p1)
@@ -34,7 +34,7 @@ defmodule Player do
     {suit, number} = getCard() |> stringToCardValue()
     card = {suit, number}
     if (suit == false) || (number == false) do
-      IO.puts("Not a valid input. Try again.")
+      IO.puts(IO.ANSI.red <> "Not a valid input. Try again." <> IO.ANSI.normal)
       playCard(board)
     else
       if isInHand(hand, card) do
@@ -42,7 +42,7 @@ defmodule Player do
         newHands = removeCard(hands, card, p1)
         Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
       else
-        IO.puts("You can't play that card.")
+        IO.puts(IO.ANSI.red <> "You can't play that card." <> IO.ANSI.normal)
         playCard(board)
       end
     end
