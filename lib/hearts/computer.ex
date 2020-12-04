@@ -23,7 +23,7 @@ defmodule Computer do
     else
       findSuit(playedSoFar)
     end
-    possiblePlays = findPlays(hand, suitLead, isBroken)
+    possiblePlays = findPlays(hand, suitLead, isBroken, playedSoFar)
     card = if haveTwoClubs(possiblePlays) do
       {:club, :two}
     else
@@ -45,20 +45,24 @@ defmodule Computer do
 
   def findSuit([{suit, _number} | _tail]), do: suit
 
-  def findPlays(hand, :anything, false) do
+  def findPlays(hand, :anything, false, _p) do
     Enum.filter(hand, fn {x, _y} -> x != :heart end)
   end
 
-  def findPlays(hand, :anything, true) do
+  def findPlays(hand, :anything, true, _p) do
     hand
   end
 
-  def findPlays(hand, suitLead, _isBroken) do
+  def findPlays(hand, suitLead, _isBroken, p) do
     suit? = Rules.haveSuit(hand, suitLead)
     if suit? do
       Enum.filter(hand, fn {x, _y} -> x == suitLead end)
     else
-      hand
+      if haveTwoClubs(p) do
+        Enum.filter(hand, fn {x, _y} -> x != :heart end)
+      else
+        hand
+      end
     end
   end
 
