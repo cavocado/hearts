@@ -1,5 +1,4 @@
 defmodule Rules do
-
   def ruleCheck(board) do
     playedSoFar = board.playedSoFar
     hands = board.hands
@@ -10,11 +9,14 @@ defmodule Rules do
     p4 = board.p4
     isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
-    {fineSuit, newIsBroken} = cond do
-      sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
-      sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
-      sizePlayedSoFar < 1 -> {true, isBroken}
-    end
+
+    {fineSuit, newIsBroken} =
+      cond do
+        sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
+        sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
+        sizePlayedSoFar < 1 -> {true, isBroken}
+      end
+
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
@@ -22,6 +24,7 @@ defmodule Rules do
       Board.changeH(board, newHands) |> Board.changeP(Enum.drop(playedSoFar, -1))
     else
       newBoard = Board.changeB(board, newIsBroken)
+
       if sizePlayedSoFar < 4 do
         Board.changeP1(newBoard, p2)
         |> Board.changeP2(p3)
@@ -38,17 +41,30 @@ defmodule Rules do
         forPlayer = rem(whichPlayer + 3, 4)
         newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
         newIsBroken = haveQueenSpades(playedSoFar, isBroken)
-        nextBoard = Board.changeT(newBoard, newTricks)
-        |> Board.changeP1(whichPlayer)
-        |> Board.changeP2(secPlayer)
-        |> Board.changeP3(thrPlayer)
-        |> Board.changeP4(forPlayer)
-        |> Board.changeP([])
-        |> Board.changeB(newIsBroken)
-        if hands == [[],[],[],[]] do
+
+        [clubs, diamonds, hearts, spades] =
+          numSuit(playedSoFar, newBoard.cLeft, newBoard.dLeft, newBoard.hLeft, newBoard.sLeft)
+
+        IO.puts("clubs left: #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}")
+
+        nextBoard =
+          Board.changeT(newBoard, newTricks)
+          |> Board.changeP1(whichPlayer)
+          |> Board.changeP2(secPlayer)
+          |> Board.changeP3(thrPlayer)
+          |> Board.changeP4(forPlayer)
+          |> Board.changeP([])
+          |> Board.changeB(newIsBroken)
+          |> Board.changeCL(clubs)
+          |> Board.changeDL(diamonds)
+          |> Board.changeHL(hearts)
+          |> Board.changeSL(spades)
+
+        if hands == [[], [], [], []] do
           scores = board.scores
           IO.puts("The new scores are ")
           IO.inspect(newScores(newTricks, scores))
+
           Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
         else
@@ -58,7 +74,20 @@ defmodule Rules do
     end
   end
 
-  def printCardsPlayed([{suit1, num1}, {suit2, num2}, {suit3, num3}, {suit4, num4}], [p1, p2, p3, p4]) do
+  def numSuit(playedSoFar, cLeft, dLeft, hLeft, sLeft) do
+    clubs = Enum.count(playedSoFar, fn {x, _y} -> x == :club end)
+    diamonds = Enum.count(playedSoFar, fn {x, _y} -> x == :diamond end)
+    hearts = Enum.count(playedSoFar, fn {x, _y} -> x == :heart end)
+    spades = Enum.count(playedSoFar, fn {x, _y} -> x == :spade end)
+    [cLeft - clubs, dLeft - diamonds, hLeft - hearts, sLeft - spades]
+  end
+
+  def printCardsPlayed([{suit1, num1}, {suit2, num2}, {suit3, num3}, {suit4, num4}], [
+        p1,
+        p2,
+        p3,
+        p4
+      ]) do
     IO.puts("Player #{p1 + 1} played the #{num1} of #{suit1}s")
     IO.puts("Player #{p2 + 1} played the #{num2} of #{suit2}s")
     IO.puts("Player #{p3 + 1} played the #{num3} of #{suit3}s")
@@ -74,6 +103,7 @@ defmodule Rules do
 
   def checkFirstCard(hands, [{suit, number}], isBroken, p1) do
     hand = findHand(p1, hands)
+
     cond do
       haveTwoClubs(hands) and {suit, number} == {:club, :two} -> {true, isBroken}
       haveTwoClubs(hands) -> {false, isBroken}
@@ -112,6 +142,7 @@ defmodule Rules do
     player = first
     hand = findHand(player, hands)
     {qSuit, _qNumber} = List.last(tail)
+
     cond do
       suit == qSuit -> {true, isBroken}
       haveSuit(hand, suit) -> {false, isBroken}
@@ -145,20 +176,57 @@ defmodule Rules do
 
   def largestCard([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}]) do
     suit = suit1
-    numbers = Enum.map([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}], fn {x, y} -> checkSuit(x, y, suit) end)
+
+    numbers =
+      Enum.map([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}], fn {x, y} ->
+        checkSuit(x, y, suit)
+      end)
+
     correspondingNumbers = Enum.map(numbers, fn a -> getNumber(a) end)
     greatest = Enum.max(correspondingNumbers)
     {suit, getAtom(greatest)}
   end
 
   def getNumber(y) do
-    map = %{:zero => 0, :two => 2, :three => 3, :four => 4, :five => 5, :six => 6, :seven => 7, :eight => 8, :nine => 9, :ten => 10, :jack => 11, :queen => 12, :king => 13, :ace => 14}
+    map = %{
+      :zero => 0,
+      :two => 2,
+      :three => 3,
+      :four => 4,
+      :five => 5,
+      :six => 6,
+      :seven => 7,
+      :eight => 8,
+      :nine => 9,
+      :ten => 10,
+      :jack => 11,
+      :queen => 12,
+      :king => 13,
+      :ace => 14
+    }
+
     {:ok, num} = Map.fetch(map, y)
     num
   end
 
   def getAtom(num) do
-    map2 = %{0 => :zero, 2 => :two, 3 => :three, 4 => :four, 5 => :five, 6 => :six, 7 => :seven, 8 => :eight, 9 => :nine, 10 => :ten, 11 => :jack, 12 => :queen, 13 => :king, 14 => :ace}
+    map2 = %{
+      0 => :zero,
+      2 => :two,
+      3 => :three,
+      4 => :four,
+      5 => :five,
+      6 => :six,
+      7 => :seven,
+      8 => :eight,
+      9 => :nine,
+      10 => :ten,
+      11 => :jack,
+      12 => :queen,
+      13 => :king,
+      14 => :ace
+    }
+
     {:ok, atom} = Map.fetch(map2, num)
     atom
   end
@@ -187,12 +255,27 @@ defmodule Rules do
   def newScores(tricks, [p1Score, p2Score, p3Score, p4Score]) do
     [newP1, newP2, newP3, newP4] = countHearts(tricks)
     [queen1, queen2, queen3, queen4] = countQueen(tricks)
+
     cond do
-      newP1 + queen1 == 26 -> [p1Score, p2Score + 26, p3Score + 26, p4Score + 26]
-      newP2 + queen2 == 26 -> [p1Score + 26, p2Score, p3Score + 26, p4Score + 26]
-      newP3 + queen3 == 26 -> [p1Score + 26, p2Score + 26, p3Score, p4Score + 25]
-      newP4 + queen4 == 26 -> [p1Score + 26, p2Score + 26, p3Score + 26, p4Score]
-      true -> [p1Score + newP1 + queen1, p2Score + newP2 + queen2, p3Score + newP3 + queen3, p4Score + newP4 + queen4]
+      newP1 + queen1 == 26 ->
+        [p1Score, p2Score + 26, p3Score + 26, p4Score + 26]
+
+      newP2 + queen2 == 26 ->
+        [p1Score + 26, p2Score, p3Score + 26, p4Score + 26]
+
+      newP3 + queen3 == 26 ->
+        [p1Score + 26, p2Score + 26, p3Score, p4Score + 25]
+
+      newP4 + queen4 == 26 ->
+        [p1Score + 26, p2Score + 26, p3Score + 26, p4Score]
+
+      true ->
+        [
+          p1Score + newP1 + queen1,
+          p2Score + newP2 + queen2,
+          p3Score + newP3 + queen3,
+          p4Score + newP4 + queen4
+        ]
     end
   end
 
@@ -201,7 +284,9 @@ defmodule Rules do
   end
 
   def countQueen(tricks) do
-    [p1, p2, p3, p4] = Enum.map(tricks, fn x -> Enum.count(x, fn y -> y == {:spade, :queen} end) end)
+    [p1, p2, p3, p4] =
+      Enum.map(tricks, fn x -> Enum.count(x, fn y -> y == {:spade, :queen} end) end)
+
     cond do
       p1 == 1 -> [13, 0, 0, 0]
       p2 == 1 -> [0, 13, 0, 0]

@@ -1,5 +1,4 @@
 defmodule Player do
-
   def passCards(board) do
     [hand | _tail] = board.hands
     IO.inspect(hand)
@@ -10,7 +9,11 @@ defmodule Player do
   end
 
   def getPassingCard(p1) do
-    card = IO.gets(IO.ANSI.red <> "Player 1: Pick a card to pass: " <> IO.ANSI.normal) |> String.trim() |> stringToCardValue()
+    card =
+      IO.gets(IO.ANSI.red() <> "Player 1: Pick a card to pass: " <> IO.ANSI.normal())
+      |> String.trim()
+      |> stringToCardValue()
+
     if isInHand(p1, card) do
       card
     else
@@ -23,18 +26,25 @@ defmodule Player do
     p1 = board.p1
     playedSoFar = board.playedSoFar
     hands = board.hands
-    IO.puts(IO.ANSI.green <> "It's player #{p1 + 1}'s turn." <> IO.ANSI.normal)
+    IO.puts(IO.ANSI.green() <> "It's player #{p1 + 1}'s turn." <> IO.ANSI.normal())
+
     if Enum.count(playedSoFar) > 0 do
-      IO.puts(IO.ANSI.light_blue <> "Here are the cards that have been played already" <> IO.ANSI.normal)
+      IO.puts(
+        IO.ANSI.light_blue() <>
+          "Here are the cards that have been played already" <> IO.ANSI.normal()
+      )
+
       cardsPlayed(playedSoFar)
     end
+
     hand = getHand(hands, p1)
     IO.puts("Here is your hand:")
     IO.inspect(hand)
     {suit, number} = getCard() |> stringToCardValue()
     card = {suit, number}
-    if (suit == false) || (number == false) do
-      IO.puts(IO.ANSI.red <> "Not a valid input. Try again." <> IO.ANSI.normal)
+
+    if suit == false || number == false do
+      IO.puts(IO.ANSI.red() <> "Not a valid input. Try again." <> IO.ANSI.normal())
       playCard(board)
     else
       if isInHand(hand, card) do
@@ -42,7 +52,7 @@ defmodule Player do
         newHands = removeCard(hands, card, p1)
         Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
       else
-        IO.puts(IO.ANSI.red <> "You can't play that card." <> IO.ANSI.normal)
+        IO.puts(IO.ANSI.red() <> "You can't play that card." <> IO.ANSI.normal())
         playCard(board)
       end
     end
@@ -79,8 +89,25 @@ defmodule Player do
   end
 
   def getNumberAtom(num) do
-    numberValues = %{"0" => :zero, "2" => :two, "3" => :three, "4" => :four, "5" => :five, "6" => :six, "7" => :seven, "8" => :eight, "9" => :nine, "10" => :ten, "jack" => :jack, "queen" => :queen, "king" => :king, "ace" => :ace}
+    numberValues = %{
+      "0" => :zero,
+      "2" => :two,
+      "3" => :three,
+      "4" => :four,
+      "5" => :five,
+      "6" => :six,
+      "7" => :seven,
+      "8" => :eight,
+      "9" => :nine,
+      "10" => :ten,
+      "jack" => :jack,
+      "queen" => :queen,
+      "king" => :king,
+      "ace" => :ace
+    }
+
     result = Map.fetch(numberValues, num)
+
     if result == :error do
       false
     else
@@ -90,8 +117,15 @@ defmodule Player do
   end
 
   def getSuitAtom(suit) do
-    suitValues = %{"diamonds" => :diamond, "clubs" => :club, "hearts" => :heart, "spades" => :spade}
+    suitValues = %{
+      "diamonds" => :diamond,
+      "clubs" => :club,
+      "hearts" => :heart,
+      "spades" => :spade
+    }
+
     result = Map.fetch(suitValues, suit)
+
     if result == :error do
       false
     else
@@ -102,6 +136,7 @@ defmodule Player do
 
   def isInHand(hand, {suit, number}) do
     card = List.keyfind(hand, suit, 0)
+
     if card == nil do
       false
     else
@@ -113,5 +148,4 @@ defmodule Player do
       end
     end
   end
-
 end

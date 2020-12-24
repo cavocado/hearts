@@ -20,7 +20,13 @@ defmodule Hearts do
     nextPlayer = rem(twoClubs + 1, 4)
     followingPlayer = rem(nextPlayer + 1, 4)
     lastPlayer = rem(followingPlayer + 1, 4)
-    newBoard = Board.changeP1(board, twoClubs) |> Board.changeP2(nextPlayer) |> Board.changeP3(followingPlayer) |> Board.changeP4(lastPlayer)
+
+    newBoard =
+      Board.changeP1(board, twoClubs)
+      |> Board.changeP2(nextPlayer)
+      |> Board.changeP3(followingPlayer)
+      |> Board.changeP4(lastPlayer)
+
     game(newBoard)
   end
 
@@ -32,12 +38,15 @@ defmodule Hearts do
   def passingCards(board) do
     roundNumber = board.roundNumber
     hands = board.hands
-    type = cond do
-      rem(roundNumber, 4) == 0 -> "left"
-      rem(roundNumber, 4) == 1 -> "right"
-      rem(roundNumber, 4) == 2 -> "across"
-      rem(roundNumber, 4) == 3 -> "hold"
-    end
+
+    type =
+      cond do
+        rem(roundNumber, 4) == 0 -> "left"
+        rem(roundNumber, 4) == 1 -> "right"
+        rem(roundNumber, 4) == 2 -> "across"
+        rem(roundNumber, 4) == 3 -> "hold"
+      end
+
     if type == "hold" do
       board
     else
@@ -45,11 +54,23 @@ defmodule Hearts do
       [p2c1, p2c2, p2c3] = Computer.pickPassingCards(board, 1)
       [p3c1, p3c2, p3c3] = Computer.pickPassingCards(board, 2)
       [p4c1, p4c2, p4c3] = Computer.pickPassingCards(board, 3)
-      newHands = removePassingCards(hands, p1c1, p1c2, p1c3, 0)
+
+      newHands =
+        removePassingCards(hands, p1c1, p1c2, p1c3, 0)
         |> removePassingCards(p2c1, p2c2, p2c3, 1)
         |> removePassingCards(p3c1, p3c2, p3c3, 2)
         |> removePassingCards(p4c1, p4c2, p4c3, 3)
-      finalHands = addPassingCards(newHands, type, [p1c1, p1c2, p1c3], [p2c1, p2c2, p2c3], [p3c1, p3c2, p3c3], [p4c1, p4c2, p4c3])
+
+      finalHands =
+        addPassingCards(
+          newHands,
+          type,
+          [p1c1, p1c2, p1c3],
+          [p2c1, p2c2, p2c3],
+          [p3c1, p3c2, p3c3],
+          [p4c1, p4c2, p4c3]
+        )
+
       sortedHands = Enum.map(finalHands, fn x -> Setup.sortCards(x) end)
       Board.changeH(board, sortedHands)
     end
@@ -69,10 +90,17 @@ defmodule Hearts do
 
   def removePassingCards([p1, p2, p3, p4], card1, card2, card3, player) do
     cond do
-      player == 0 -> [p1 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p2, p3, p4]
-      player == 1 -> [p1, p2 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p3, p4]
-      player == 2 -> [p1, p2, p3 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p4]
-      player == 3 -> [p1, p2, p3, p4 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3)]
+      player == 0 ->
+        [p1 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p2, p3, p4]
+
+      player == 1 ->
+        [p1, p2 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p3, p4]
+
+      player == 2 ->
+        [p1, p2, p3 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3), p4]
+
+      player == 3 ->
+        [p1, p2, p3, p4 |> List.delete(card1) |> List.delete(card2) |> List.delete(card3)]
     end
   end
 
@@ -81,14 +109,19 @@ defmodule Hearts do
 
   def game(state) do
     p1 = state.p1
-    nextState = if p1 == 0 do
-      Player.playCard(state)
-    else
-      Computer.pickCard(state)
-    end
+
+    nextState =
+      if p1 == 0 do
+        Player.playCard(state)
+      else
+        Computer.pickCard(state)
+      end
+
     newState = Rules.ruleCheck(nextState)
+
     if no_more_cards?(newState.hands) do
       scores = newState.scores
+
       if endGame?(scores) do
         winningScore = Enum.min(scores)
         winner = whoWon?(scores, winningScore)
@@ -113,5 +146,4 @@ defmodule Hearts do
   def whoWon?([_p1, winningScore, _p3, _p4], winningScore), do: 1
   def whoWon?([_p1, _p2, winningScore, _p4], winningScore), do: 2
   def whoWon?([_p1, _p2, _p3, winningScore], winningScore), do: 3
-
 end

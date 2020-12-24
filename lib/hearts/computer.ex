@@ -1,5 +1,4 @@
 defmodule Computer do
-
   def pickPassingCards(board, player) do
     hands = board.hands
     hand = findHand(hands, player)
@@ -18,18 +17,25 @@ defmodule Computer do
     hand = findHand(hands, player)
     playedSoFar = board.playedSoFar
     isBroken = board.broken?
-    suitLead = if playedSoFar == [] do
-      :anything
-    else
-      findSuit(playedSoFar)
-    end
+
+    suitLead =
+      if playedSoFar == [] do
+        :anything
+      else
+        findSuit(playedSoFar)
+      end
+
     possiblePlays = findPlays(hand, suitLead, isBroken, playedSoFar)
-    card = if haveTwoClubs(possiblePlays) do
-      {:club, :two}
-    else
-      Enum.shuffle(possiblePlays) |> List.first()
-    end
+
+    card =
+      if haveTwoClubs(possiblePlays) do
+        {:club, :two}
+      else
+        Enum.shuffle(possiblePlays) |> List.first()
+      end
+
     newHands = Player.removeCard(hands, card, player)
+
     board
     |> Board.changeH(newHands)
     |> Board.changeP(playedSoFar ++ [card])
@@ -55,6 +61,7 @@ defmodule Computer do
 
   def findPlays(hand, suitLead, _isBroken, p) do
     suit? = Rules.haveSuit(hand, suitLead)
+
     if suit? do
       Enum.filter(hand, fn {x, _y} -> x == suitLead end)
     else
@@ -65,5 +72,4 @@ defmodule Computer do
       end
     end
   end
-
 end

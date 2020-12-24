@@ -1,18 +1,19 @@
 defmodule Board do
-
-  defstruct [
-              hands: [],
-              broken?: false,
-              playedSoFar: [],
-              tricks: [[],[],[],[]],
-              p1: 0,
-              p2: 1,
-              p3: 2,
-              p4: 3,
-              scores: [0,0,0,0],
-              roundNumber: 0,
-              roundOver: false
-            ]
+  defstruct hands: [],
+            broken?: false,
+            playedSoFar: [],
+            tricks: [[], [], [], []],
+            p1: 0,
+            p2: 1,
+            p3: 2,
+            p4: 3,
+            scores: [0, 0, 0, 0],
+            roundNumber: 0,
+            roundOver: false,
+            sLeft: 13,
+            hLeft: 13,
+            dLeft: 13,
+            cLeft: 13
 
   def new() do
     %Board{}
@@ -62,4 +63,19 @@ defmodule Board do
     %Board{board | roundOver: value}
   end
 
+  def changeSL(board, value) do
+    %Board{board | sLeft: value}
+  end
+
+  def changeHL(board, value) do
+    %Board{board | hLeft: value}
+  end
+
+  def changeCL(board, value) do
+    %Board{board | cLeft: value}
+  end
+
+  def changeDL(board, value) do
+    %Board{board | dLeft: value}
+  end
 end
