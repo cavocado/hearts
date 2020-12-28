@@ -63,7 +63,6 @@ defmodule Computer do
 
   def removeSuit(_hand, _suit, _num), do: []
 
-  # Somehow hearts are being played when they can't (including at beginning)
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, _hearts) do
     sNum = spades - countSuit(hand, :spade)
     dNum = diamonds - countSuit(hand, :diamond)

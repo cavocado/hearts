@@ -34,7 +34,7 @@ defmodule Rules do
       else
         bigCard = largestCard(playedSoFar)
         whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p2, p3, p4, p1])
-        IO.puts("Player #{whichPlayer + 1} won the trick.")
+        IO.puts("Player #{whichPlayer + 1} won the trick.\n")
         printCardsPlayed(playedSoFar, [p2, p3, p4, p1])
         secPlayer = rem(whichPlayer + 1, 4)
         thrPlayer = rem(whichPlayer + 2, 4)
@@ -45,7 +45,9 @@ defmodule Rules do
         [clubs, diamonds, hearts, spades] =
           numSuit(playedSoFar, newBoard.cLeft, newBoard.dLeft, newBoard.hLeft, newBoard.sLeft)
 
-        IO.puts("clubs left: #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}")
+        IO.puts(
+          "left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
+        )
 
         nextBoard =
           Board.changeT(newBoard, newTricks)
