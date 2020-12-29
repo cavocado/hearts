@@ -74,9 +74,17 @@ defmodule Computer do
     final = ((left -- removeS) -- removeD) -- removeC
 
     if final == [] do
-      left
+      if Rules.getLength(left, 0) > 1 do
+        List.delete(left, {:spade, :queen})
+      else
+        left
+      end
     else
-      final
+      if Rules.getLength(final, 0) > 1 do
+        List.delete(final, {:spade, :queen})
+      else
+        final
+      end
     end
   end
 
@@ -92,9 +100,17 @@ defmodule Computer do
     final = (((hand -- removeS) -- removeD) -- removeC) -- removeH
 
     if final == [] do
-      hand
+      if Rules.getLength(hand, 0) > 1 do
+        List.delete(hand, {:spade, :queen})
+      else
+        hand
+      end
     else
-      final
+      if Rules.getLength(final, 0) > 1 do
+        List.delete(final, {:spade, :queen})
+      else
+        final
+      end
     end
   end
 
