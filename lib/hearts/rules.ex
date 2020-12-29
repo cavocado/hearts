@@ -90,10 +90,44 @@ defmodule Rules do
         p3,
         p4
       ]) do
-    IO.puts("Player #{p1 + 1} played the #{num1} of #{suit1}s")
-    IO.puts("Player #{p2 + 1} played the #{num2} of #{suit2}s")
-    IO.puts("Player #{p3 + 1} played the #{num3} of #{suit3}s")
-    IO.puts("Player #{p4 + 1} played the #{num4} of #{suit4}s")
+    IO.puts("Player #{p1 + 1} played:")
+    printCard({suit1, num1})
+    IO.puts("Player #{p2 + 1} played:")
+    printCard({suit2, num2})
+    IO.puts("Player #{p3 + 1} played:")
+    printCard({suit3, num3})
+    IO.puts("Player #{p4 + 1} played:")
+    printCard({suit4, num4})
+  end
+
+  def printCard({suit, num}) do
+    suitM = %{:spade => "♠️", :diamond => "♦️", :heart => "♥️", :club => "♣️"}
+
+    numM = %{
+      :two => "2 ",
+      :three => "3 ",
+      :four => "4 ",
+      :five => "5 ",
+      :six => "6 ",
+      :seven => "7 ",
+      :eight => "8 ",
+      :nine => "9 ",
+      :ten => "10",
+      :jack => "J ",
+      :queen => "Q ",
+      :king => "K ",
+      :ace => "A "
+    }
+
+    {:ok, nSuit} = Map.fetch(suitM, suit)
+    {:ok, nNum} = Map.fetch(numM, num)
+
+    IO.puts("-------------")
+    IO.puts("|           |")
+    IO.puts("|     #{nNum}    |")
+    IO.puts("|     #{nSuit}     |")
+    IO.puts("|           |")
+    IO.puts("-------------")
   end
 
   def haveQueenSpades(playedSoFar, isBroken) do
