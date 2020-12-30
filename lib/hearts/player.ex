@@ -1,7 +1,8 @@
 defmodule Player do
   def passCards(board) do
     [hand | _tail] = board.hands
-    IO.inspect(hand)
+    IO.puts("Here is your hand:")
+    IO.puts(formatHand(hand, ""))
     p1c1 = getPassingCard(hand)
     p1c2 = getPassingCard(hand)
     p1c3 = getPassingCard(hand)
@@ -22,6 +23,35 @@ defmodule Player do
     end
   end
 
+  def formatHand([{s, n} | t], string) do
+    suitM = %{:spade => "♠️", :diamond => "♦️", :heart => "♥️", :club => "♣️"}
+
+    numM = %{
+      :two => "2 ",
+      :three => "3 ",
+      :four => "4 ",
+      :five => "5 ",
+      :six => "6 ",
+      :seven => "7 ",
+      :eight => "8 ",
+      :nine => "9 ",
+      :ten => "10",
+      :jack => "J ",
+      :queen => "Q ",
+      :king => "K ",
+      :ace => "A "
+    }
+
+    suit = Map.fetch!(suitM, s)
+    num = Map.fetch!(numM, n)
+
+    if t == [] do
+      string <> num <> suit
+    else
+      formatHand(t, string <> num <> suit <> ", ")
+    end
+  end
+
   def playCard(board) do
     p1 = board.p1
     playedSoFar = board.playedSoFar
@@ -30,12 +60,13 @@ defmodule Player do
 
     if Enum.count(playedSoFar) > 0 do
       IO.puts("Here are the cards that have been played already")
-      cardsPlayed(playedSoFar)
+
+      IO.puts(formatHand(playedSoFar, ""))
     end
 
     hand = getHand(hands, p1)
     IO.puts("\nHere is your hand:")
-    IO.inspect(hand)
+    IO.puts(formatHand(hand, ""))
     {suit, number} = getCard() |> stringToCardValue()
     card = {suit, number}
 
@@ -71,10 +102,6 @@ defmodule Player do
   def getCard() do
     card = IO.gets("What card would you like to play? ")
     String.trim(card)
-  end
-
-  def cardsPlayed(playedCards) do
-    Enum.map(playedCards, fn {x, y} -> IO.puts("#{y} of #{x}s\n") end)
   end
 
   def stringToCardValue(card) do

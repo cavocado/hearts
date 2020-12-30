@@ -122,12 +122,13 @@ defmodule Rules do
     {:ok, nSuit} = Map.fetch(suitM, suit)
     {:ok, nNum} = Map.fetch(numM, num)
 
-    IO.puts("-------------")
-    IO.puts("|           |")
-    IO.puts("|     #{nNum}    |")
-    IO.puts("|     #{nSuit}     |")
-    IO.puts("|           |")
-    IO.puts("-------------")
+    # IO.puts("-------------")
+    # IO.puts("|           |")
+    # IO.puts("|     #{nNum}    |")
+    # IO.puts("|     #{nSuit}     |")
+    # IO.puts("|           |")
+    # IO.puts("-------------")
+    IO.puts("#{nNum}#{nSuit}")
   end
 
   def haveQueenSpades(playedSoFar, isBroken) do
