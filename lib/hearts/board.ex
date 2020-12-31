@@ -15,7 +15,8 @@ defmodule Board do
             dLeft: 13,
             cLeft: 13,
             heart1: 10,
-            heart2: 10
+            heart2: 10,
+            easy?: false
 
   def new() do
     %Board{}
@@ -87,5 +88,9 @@ defmodule Board do
 
   def changeH2(board, value) do
     %Board{board | heart2: value}
+  end
+
+  def changeE(board, value) do
+    %Board{board | easy?: value}
   end
 end

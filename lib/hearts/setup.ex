@@ -3,10 +3,21 @@ defmodule Setup do
     listHands = shuffleAndDeal()
     sortedHands = Enum.map(listHands, fn x -> sortCards(x) end)
 
-    Board.new()
-    |> Board.changeS(currentScores)
-    |> Board.changeRN(currentRoundNumber)
-    |> Board.changeH(sortedHands)
+    board =
+      Board.new()
+      |> Board.changeS(currentScores)
+      |> Board.changeRN(currentRoundNumber)
+      |> Board.changeH(sortedHands)
+
+    answer =
+      IO.gets("Would you like to have the word count (easier) or not (harder)? (yes/no) ")
+      |> String.trim()
+
+    if answer == "yes" do
+      Board.changeE(board, true)
+    else
+      board
+    end
   end
 
   def shuffleAndDeal() do

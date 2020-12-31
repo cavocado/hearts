@@ -45,9 +45,11 @@ defmodule Rules do
         [clubs, diamonds, hearts, spades] =
           numSuit(playedSoFar, newBoard.cLeft, newBoard.dLeft, newBoard.hLeft, newBoard.sLeft)
 
-        IO.puts(
-          "left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
-        )
+        if newBoard.easy? == true do
+          IO.puts(
+            "left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
+          )
+        end
 
         nextBoard =
           Board.changeT(newBoard, newTricks)
