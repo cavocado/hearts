@@ -2,7 +2,12 @@ defmodule Player do
   def passCards(board) do
     [hand | _tail] = board.hands
     IO.puts("Here is your hand:")
-    IO.puts(formatHand(hand, ""))
+
+    IO.puts(
+      IO.ANSI.white_background() <>
+        IO.ANSI.black() <> formatHand(hand, "") <> IO.ANSI.black_background() <> IO.ANSI.white()
+    )
+
     p1c1 = getPassingCard(hand)
     p1c2 = getPassingCard(hand)
     p1c3 = getPassingCard(hand)
@@ -27,28 +32,28 @@ defmodule Player do
     suitM = %{:spade => "♠️", :diamond => "♦️", :heart => "♥️", :club => "♣️"}
 
     numM = %{
-      :two => "2 ",
-      :three => "3 ",
-      :four => "4 ",
-      :five => "5 ",
-      :six => "6 ",
-      :seven => "7 ",
-      :eight => "8 ",
-      :nine => "9 ",
+      :two => "2",
+      :three => "3",
+      :four => "4",
+      :five => "5",
+      :six => "6",
+      :seven => "7",
+      :eight => "8",
+      :nine => "9",
       :ten => "10",
-      :jack => "J ",
-      :queen => "Q ",
-      :king => "K ",
-      :ace => "A "
+      :jack => "J",
+      :queen => "Q",
+      :king => "K",
+      :ace => "A"
     }
 
     suit = Map.fetch!(suitM, s)
     num = Map.fetch!(numM, n)
 
     if t == [] do
-      string <> num <> suit
+      string <> num <> suit <> " "
     else
-      formatHand(t, string <> num <> suit <> ", ")
+      formatHand(t, string <> num <> suit <> " , ")
     end
   end
 
@@ -59,14 +64,28 @@ defmodule Player do
     IO.puts("\nIt's player #{p1 + 1}'s turn.")
 
     if Enum.count(playedSoFar) > 0 do
-      IO.puts("Here are the cards that have been played already")
+      IO.puts(
+        IO.ANSI.black_background() <>
+          IO.ANSI.white() <>
+          "Here are the cards that have been played already" <>
+          IO.ANSI.black_background() <> IO.ANSI.white()
+      )
 
-      IO.puts(formatHand(playedSoFar, ""))
+      IO.puts(
+        IO.ANSI.white_background() <>
+          IO.ANSI.black() <>
+          formatHand(playedSoFar, "") <> IO.ANSI.black_background() <> IO.ANSI.white()
+      )
     end
 
     hand = getHand(hands, p1)
     IO.puts("\nHere is your hand:")
-    IO.puts(formatHand(hand, ""))
+
+    IO.puts(
+      IO.ANSI.white_background() <>
+        IO.ANSI.black() <> formatHand(hand, "") <> IO.ANSI.black_background() <> IO.ANSI.white()
+    )
+
     {suit, number} = getCard() |> stringToCardValue()
     card = {suit, number}
 

@@ -128,7 +128,10 @@ defmodule Rules do
     # IO.puts("|     #{nSuit}     |")
     # IO.puts("|           |")
     # IO.puts("-------------")
-    IO.puts("#{nNum}#{nSuit}")
+    IO.puts(
+      IO.ANSI.white_background() <>
+        IO.ANSI.black() <> "#{nNum}#{nSuit}" <> IO.ANSI.black_background() <> IO.ANSI.white()
+    )
   end
 
   def haveQueenSpades(playedSoFar, isBroken) do
