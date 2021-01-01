@@ -10,14 +10,35 @@ defmodule Setup do
       |> Board.changeH(sortedHands)
 
     answer =
-      IO.gets("Would you like to have the word count (easier) or not (harder)? (yes/no) ")
+      IO.gets("Would you like to have the card count (easier) or not (harder)? (yes/no) ")
       |> String.trim()
 
-    if answer == "yes" do
-      Board.changeE(board, true)
-    else
-      board
-    end
+    newBoard =
+      if answer == "yes" do
+        Board.changeE(board, true)
+      else
+        board
+      end
+
+    IO.puts(
+      "\nCards are played by typing in the suit name followed by an 's', then a space \nand the numeral or word for the card number (ex: clubs 5, diamonds queen).\n"
+    )
+
+    IO.puts(
+      "You are player 1. Player 2 is to your left, player 3 is across from \nyou and player 4 is to your right.\n"
+    )
+
+    IO.puts(
+      "Passing is to the left, to the right, across and then hold.\nEvery left round you pass cards to player 2 and get cards from player 4 (reversed for right rounds).\nAcross rounds, you pass to player 3 and receive cards from player 3. During hold rounds, there is no passing.\n"
+    )
+
+    IO.puts(
+      "The order that the players play in is player 1, 2, 3, 4, starting with the player with the two of clubs.\n"
+    )
+
+    IO.puts("For more instructions, type 'help' whenever you are about to play or pass a card.")
+    IO.puts("Good luck!")
+    newBoard
   end
 
   def shuffleAndDeal() do

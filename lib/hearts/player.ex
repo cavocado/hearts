@@ -1,7 +1,7 @@
 defmodule Player do
   def passCards(board) do
     [hand | _tail] = board.hands
-    IO.puts("Here is your hand:")
+    IO.puts("\nHere is your hand:")
 
     IO.puts(
       IO.ANSI.white_background() <>
@@ -18,14 +18,49 @@ defmodule Player do
     card =
       IO.gets("Player 1: Pick a card to pass: ")
       |> String.trim()
-      |> stringToCardValue()
 
-    if isInHand(p1, card) do
-      card
-    else
-      IO.puts("Invalid choice")
+    if card == "help" do
+      printInstructions()
       getPassingCard(p1)
+    else
+      newCard = stringToCardValue(card)
+
+      if isInHand(p1, newCard) do
+        newCard
+      else
+        IO.puts("Invalid choice")
+        getPassingCard(p1)
+      end
     end
+  end
+
+  def printInstructions() do
+    IO.puts("\n
+    The goal of Hearts is to take as few hearts and the queen of spades as possible or take all of them.
+
+    At the beginning of each round, there may be some passing of cards that happens. There are 4
+    different types of rounds for a 4 player game. The first round is passing to the left, the second is
+    passing to the right, the third is passing across and the fourth is the hold hand in which no cards
+    are passed. When passing, 3 cards are chosen to give to the player in the direction indicated.
+
+    The person with the 2 of clubs starts each round by playing the 2 of clubs.
+    Each other person has to play a club as well unless they don't have any in which case they would
+    throw off a card other than a heart or the queen of spades (only a first trick rule).
+    The person who played the highest card in the suit led wins the trick and leads for the next trick
+    to repeat the process (doesn't have to lead clubs).
+
+    Hearts can't be led until someone throws off a heart or the queen of spades has been played.
+    The process above repeats until all of the cards have been played.
+
+    When a round is over, everyone counts the number of hearts they took and the person who took the
+    queen of spades adds 13 to the number of hearts they took. Then, they add the values to the scores
+    they had previously. If someone took all the hearts and the queen of spades, then they have a choice
+    to either take 26 away from their score or add 26 to all the other players' scores (in my game, 26 is
+    added to all the other scores).
+
+    Rounds are played until a player's score is greater than or equal to 100. The person with the lowest
+    score wins the game.
+    ")
   end
 
   def formatHand([{s, n} | t], string) do
@@ -119,8 +154,14 @@ defmodule Player do
   def getHand([_p1, _p2, _p3, hand], 3), do: hand
 
   def getCard() do
-    card = IO.gets("What card would you like to play? ")
-    String.trim(card)
+    card = IO.gets("What card would you like to play? ") |> String.trim()
+
+    if card == "help" do
+      printInstructions()
+      getCard()
+    else
+      card
+    end
   end
 
   def stringToCardValue(card) do

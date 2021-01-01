@@ -12,7 +12,11 @@ defmodule Hearts do
       :world
 
   """
-  # Start game with Hearts.start([0, 0, 0, 0], 0)
+  # Start game with Hearts.run()
+  def run() do
+    start([0, 0, 0, 0], 0)
+  end
+
   def start(scores, roundNumber) do
     board = Setup.main(scores, roundNumber) |> passingCards()
     pHands = board.hands
@@ -76,11 +80,11 @@ defmodule Hearts do
     end
   end
 
-  def addPassingCards([p1, p2, p3, p4], "left", fromP1, fromP2, fromP3, fromP4) do
+  def addPassingCards([p1, p2, p3, p4], "right", fromP1, fromP2, fromP3, fromP4) do
     [p1 ++ fromP2, p2 ++ fromP3, p3 ++ fromP4, p4 ++ fromP1]
   end
 
-  def addPassingCards([p1, p2, p3, p4], "right", fromP1, fromP2, fromP3, fromP4) do
+  def addPassingCards([p1, p2, p3, p4], "left", fromP1, fromP2, fromP3, fromP4) do
     [p1 ++ fromP4, p2 ++ fromP1, p3 ++ fromP2, p4 ++ fromP3]
   end
 

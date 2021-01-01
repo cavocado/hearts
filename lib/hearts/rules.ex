@@ -103,7 +103,7 @@ defmodule Rules do
   end
 
   def printCard({suit, num}) do
-    suitM = %{:spade => "♠️", :diamond => "♦️", :heart => "♥️", :club => "♣️"}
+    suitM = %{:spade => "♠️ ", :diamond => "♦️ ", :heart => "♥️ ", :club => "♣️ "}
 
     numM = %{
       :two => "2 ",
