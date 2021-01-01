@@ -12,10 +12,6 @@ defmodule Hearts do
       :world
 
   """
-  # Start game with Hearts.run()
-  def run() do
-    start([0, 0, 0, 0], 0)
-  end
 
   def start(scores, roundNumber) do
     board = Setup.main(scores, roundNumber) |> passingCards()
@@ -151,3 +147,5 @@ defmodule Hearts do
   def whoWon?([_p1, _p2, winningScore, _p4], winningScore), do: 2
   def whoWon?([_p1, _p2, _p3, winningScore], winningScore), do: 3
 end
+
+Hearts.start([0, 0, 0, 0], 0)
