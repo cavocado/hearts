@@ -2,13 +2,40 @@ defmodule Computer do
   def pickPassingCards(board, player) do
     hands = board.hands
     hand = findHand(hands, player)
+    clubs = countSuit(hand, :club)
+    diamonds = countSuit(hand, :diamond)
+    hearts = countSuit(hand, :heart)
+    spades = countSuit(hand, :spade)
     shuffledHand = Enum.shuffle(hand)
-    card1 = List.first(shuffledHand)
-    nHand = List.delete(shuffledHand, card1)
+    options = if spades <= 3 do
+      orderList(hand, :spade)
+    else
+      if diamonds <= 3 do
+        orderList(hand, :diamond)
+      else
+        if clubs <= 3 do
+          orderList(hand, :club)
+        else
+          if hearts <= 3 do
+            orderList(hand, :heart)
+          else
+            shuffledHand
+          end
+        end
+      end
+    end
+    card1 = List.first(options)
+    nHand = List.delete(options, card1)
     card2 = List.first(nHand)
     tHand = List.delete(nHand, card2)
     card3 = List.first(tHand)
     [card1, card2, card3]
+  end
+
+  def orderList(hand, suit) do
+    sList = Enum.filter(hand, fn {x, _y} -> x == suit end)
+    rest = Enum.filter(hand, fn {x, _y} -> x != suit end)
+    sList ++ rest
   end
 
   def pickCard(board) do
@@ -139,9 +166,17 @@ defmodule Computer do
     final = (((current -- removeS) -- removeD) -- removeC) -- removeH
 
     if final == [] do
-      current
+      if Rules.getLength(current, 0) > 1 and suit? do
+        List.delete(current, {:spade, :queen})
+      else
+        current
+      end
     else
-      final
+      if Rules.getLength(final, 0) > 1 and suit? do
+        List.delete(final, {:spade, :queen})
+      else
+        final
+      end
     end
   end
 end
