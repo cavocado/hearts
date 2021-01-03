@@ -9,14 +9,14 @@ defmodule Rules do
     p4 = board.p4
     isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
-
+    IO.puts("#{isBroken}")
     {fineSuit, newIsBroken} =
       cond do
         sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
         sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
         sizePlayedSoFar < 1 -> {true, isBroken}
       end
-
+    IO.puts("#{newIsBroken}")
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
@@ -40,7 +40,7 @@ defmodule Rules do
         thrPlayer = rem(whichPlayer + 2, 4)
         forPlayer = rem(whichPlayer + 3, 4)
         newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
-        newIsBroken = haveQueenSpades(playedSoFar, isBroken)
+        nextIsBroken = haveQueenSpades(playedSoFar, newIsBroken)
 
         [clubs, diamonds, hearts, spades] =
           numSuit(playedSoFar, newBoard.cLeft, newBoard.dLeft, newBoard.hLeft, newBoard.sLeft)
@@ -51,6 +51,18 @@ defmodule Rules do
           )
         end
 
+        newHeart1 = if newBoard.heart1 == 10 and hearts != newBoard.hLeft do
+          whichPlayer
+        else
+          newBoard.heart1
+        end
+
+        newHeart2 = if newBoard.heart2 == 10 and newBoard.heart1 != 10 and hearts != newBoard.hLeft and whichPlayer != newBoard.heart1 do
+          whichPlayer
+        else
+          newBoard.heart2
+        end
+
         nextBoard =
           Board.changeT(newBoard, newTricks)
           |> Board.changeP1(whichPlayer)
@@ -58,11 +70,13 @@ defmodule Rules do
           |> Board.changeP3(thrPlayer)
           |> Board.changeP4(forPlayer)
           |> Board.changeP([])
-          |> Board.changeB(newIsBroken)
+          |> Board.changeB(nextIsBroken)
           |> Board.changeCL(clubs)
           |> Board.changeDL(diamonds)
           |> Board.changeHL(hearts)
           |> Board.changeSL(spades)
+          |> Board.changeH1(newHeart1)
+          |> Board.changeH2(newHeart2)
 
         if hands == [[], [], [], []] do
           scores = board.scores
