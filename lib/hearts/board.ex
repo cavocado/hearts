@@ -16,7 +16,8 @@ defmodule Board do
             cLeft: 13,
             heart1: 10,
             heart2: 10,
-            easy?: false
+            easy?: false,
+            queen?: false
 
   def new() do
     %Board{}
@@ -92,5 +93,9 @@ defmodule Board do
 
   def changeE(board, value) do
     %Board{board | easy?: value}
+  end
+
+  def changeQ(board, value) do
+    %Board{board | queen?: value}
   end
 end

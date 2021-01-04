@@ -9,14 +9,14 @@ defmodule Rules do
     p4 = board.p4
     isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
-    IO.puts("#{isBroken}")
+
     {fineSuit, newIsBroken} =
       cond do
         sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
         sizePlayedSoFar == 1 -> checkFirstCard(hands, playedSoFar, isBroken, p1)
         sizePlayedSoFar < 1 -> {true, isBroken}
       end
-    IO.puts("#{newIsBroken}")
+
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
@@ -63,6 +63,12 @@ defmodule Rules do
           newBoard.heart2
         end
 
+        newQueen? = if Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) == 1 do
+          true
+        else
+          newBoard.queen?
+        end
+
         nextBoard =
           Board.changeT(newBoard, newTricks)
           |> Board.changeP1(whichPlayer)
@@ -77,6 +83,7 @@ defmodule Rules do
           |> Board.changeSL(spades)
           |> Board.changeH1(newHeart1)
           |> Board.changeH2(newHeart2)
+          |> Board.changeQ(newQueen?)
 
         if hands == [[], [], [], []] do
           scores = board.scores
@@ -138,12 +145,6 @@ defmodule Rules do
     {:ok, nSuit} = Map.fetch(suitM, suit)
     {:ok, nNum} = Map.fetch(numM, num)
 
-    # IO.puts("-------------")
-    # IO.puts("|           |")
-    # IO.puts("|     #{nNum}    |")
-    # IO.puts("|     #{nSuit}     |")
-    # IO.puts("|           |")
-    # IO.puts("-------------")
     IO.puts(
       IO.ANSI.white_background() <>
         IO.ANSI.black() <> "#{nNum}#{nSuit}" <> IO.ANSI.black_background() <> IO.ANSI.white()
