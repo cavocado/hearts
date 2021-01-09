@@ -1,14 +1,33 @@
 defmodule Setup do
+  # Sets up each round
   def main(currentScores, currentRoundNumber, cardCount?) do
+    # Deals cards and sorts the hands
     listHands = shuffleAndDeal()
-    sortedHands = Enum.map(listHands, fn x -> sortCards(x) end)
+    [p1, p2, p3, p4] = Enum.map(listHands, fn x -> sortCards(x) end)
 
+    # Checks if a player could take all of the hearts and queen of spades
+    run2 = Computer.run?(p2)
+    run3 = Computer.run?(p3)
+    run4 = Computer.run?(p4)
+
+    # Creates the state of the game
     board =
       Board.new()
       |> Board.changeS(currentScores)
       |> Board.changeRN(currentRoundNumber)
-      |> Board.changeH(sortedHands)
+      |> Board.changeH([p1, p2, p3, p4])
+      |> Board.changeR2(run2)
+      |> Board.changeR3(run3)
+      |> Board.changeR4(run4)
 
+    case rem(currentRoundNumber, 4) do
+      0 -> IO.puts("\nPass left this round.")
+      1 -> IO.puts("\nPass right this round.")
+      2 -> IO.puts("\nPass across this round.")
+      3 -> IO.puts("\nThis is a hold hand.")
+    end
+
+    # Checks if the card count should be displayed or not
     if cardCount? do
       Board.changeE(board, true)
     else
@@ -16,6 +35,7 @@ defmodule Setup do
     end
   end
 
+  # Function to randomize hands
   def shuffleAndDeal() do
     deck = [
       {:club, :two},
@@ -75,12 +95,14 @@ defmodule Setup do
     deck |> Enum.shuffle() |> Enum.chunk_every(13)
   end
 
+  # Sorts cards by suit and numerical order
   def sortCards(hand) do
     newHand = Enum.map(hand, fn a -> getNumber(a) end)
     sorted = Enum.sort(newHand)
     Enum.map(sorted, fn b -> getAtom(b) end)
   end
 
+  # Translates atoms into integers for sorting
   def getNumber({x, y}) do
     map = %{
       :two => 2,
@@ -102,6 +124,7 @@ defmodule Setup do
     {x, num}
   end
 
+  # Translates integers back to atoms
   def getAtom({x, y}) do
     map2 = %{
       2 => :two,

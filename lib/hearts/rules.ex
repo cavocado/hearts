@@ -1,4 +1,5 @@
 defmodule Rules do
+  # Checks validity of plays and updates the state of the game
   def ruleCheck(board) do
     playedSoFar = board.playedSoFar
     hands = board.hands
@@ -10,6 +11,7 @@ defmodule Rules do
     isBroken = board.broken?
     sizePlayedSoFar = getLength(playedSoFar, 0)
 
+    # Checks if card played is valid for different circumstances and if hearts have been broken
     {fineSuit, newIsBroken} =
       cond do
         sizePlayedSoFar > 1 -> okSuit(hands, playedSoFar, p1, isBroken)
@@ -17,6 +19,7 @@ defmodule Rules do
         sizePlayedSoFar < 1 -> {true, isBroken}
       end
 
+    # Changes the state of the game to progress if the card is valid or to return back if the card wasn't valid
     if not fineSuit do
       aHands = addCard(hands, List.last(playedSoFar), p1)
       newHands = Enum.map(aHands, fn x -> Setup.sortCards(x) end)
@@ -25,13 +28,16 @@ defmodule Rules do
     else
       newBoard = Board.changeB(board, newIsBroken)
 
+      # Checks if everyone has played
       if sizePlayedSoFar < 4 do
+        # Goes to next player if not everyone has played
         Board.changeP1(newBoard, p2)
         |> Board.changeP2(p3)
         |> Board.changeP3(p4)
         |> Board.changeP4(p1)
         |> Board.changeRO(false)
       else
+        # Determines which player played the highest card
         bigCard = largestCard(playedSoFar)
         whichPlayer = playerWithHighCard(bigCard, playedSoFar, [p2, p3, p4, p1])
         IO.puts("Player #{whichPlayer + 1} won the trick.\n")
@@ -42,15 +48,18 @@ defmodule Rules do
         newTricks = wonTrick(whichPlayer, tricks, playedSoFar)
         nextIsBroken = haveQueenSpades(playedSoFar, newIsBroken)
 
+        # Updates the number of each suit that haven't been played yet
         [clubs, diamonds, hearts, spades] =
           numSuit(playedSoFar, newBoard.cLeft, newBoard.dLeft, newBoard.hLeft, newBoard.sLeft)
 
+        # Prints the numbers left if requested by the player
         if newBoard.easy? == true do
           IO.puts(
             "left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
           )
         end
 
+        # Updates which players have taken tricks which included hearts
         newHeart1 = if newBoard.heart1 == 10 and hearts != newBoard.hLeft do
           whichPlayer
         else
@@ -63,12 +72,14 @@ defmodule Rules do
           newBoard.heart2
         end
 
+        # Updates whether or not the queen of spades has been played
         newQueen? = if Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) == 1 do
           true
         else
           newBoard.queen?
         end
 
+        # Changes the state of the game
         nextBoard =
           Board.changeT(newBoard, newTricks)
           |> Board.changeP1(whichPlayer)
@@ -85,6 +96,7 @@ defmodule Rules do
           |> Board.changeH2(newHeart2)
           |> Board.changeQ(newQueen?)
 
+        # Checks if the round is over or not; if it is, the new scores are calculated and printed
         if hands == [[], [], [], []] do
           scores = board.scores
           IO.puts("The new scores are ")
@@ -99,6 +111,7 @@ defmodule Rules do
     end
   end
 
+  # Subtracts the number of each suit that was played in a trick from the number of each suit left
   def numSuit(playedSoFar, cLeft, dLeft, hLeft, sLeft) do
     clubs = Enum.count(playedSoFar, fn {x, _y} -> x == :club end)
     diamonds = Enum.count(playedSoFar, fn {x, _y} -> x == :diamond end)
@@ -107,6 +120,7 @@ defmodule Rules do
     [cLeft - clubs, dLeft - diamonds, hLeft - hearts, sLeft - spades]
   end
 
+  # Prints what card each player played
   def printCardsPlayed([{suit1, num1}, {suit2, num2}, {suit3, num3}, {suit4, num4}], [
         p1,
         p2,
@@ -123,6 +137,7 @@ defmodule Rules do
     printCard({suit4, num4})
   end
 
+  # Formats how cards are printed
   def printCard({suit, num}) do
     suitM = %{:spade => "♠️ ", :diamond => "♦️ ", :heart => "♥️ ", :club => "♣️ "}
 
@@ -151,6 +166,7 @@ defmodule Rules do
     )
   end
 
+  # Checks if the queen of spades was played and changes whether hearts have been broken accordingly
   def haveQueenSpades(playedSoFar, isBroken) do
     cond do
       Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) > 0 -> true
@@ -158,6 +174,7 @@ defmodule Rules do
     end
   end
 
+  # Checks the validity of cards led
   def checkFirstCard(hands, [{suit, number}], isBroken, p1) do
     hand = findHand(p1, hands)
 
@@ -171,12 +188,14 @@ defmodule Rules do
     end
   end
 
+  # Checks if anyone has the two of clubs
   defp haveTwoClubs([[{:club, :two} | _tail], _player2, _player3, _player4]), do: true
   defp haveTwoClubs([_player1, [{:club, :two} | _tail], _player3, _player4]), do: true
   defp haveTwoClubs([_player1, _player2, [{:club, :two} | _tail], _player4]), do: true
   defp haveTwoClubs([_player1, _player2, _player3, [{:club, :two} | _tail]]), do: true
   defp haveTwoClubs(_hands), do: false
 
+  # Gets the length of a list
   def getLength(list, count) do
     if list == [] do
       count
@@ -186,6 +205,7 @@ defmodule Rules do
     end
   end
 
+  # Adds cards back to hands when an invalid play is made
   def addCard([p1, p2, p3, p4], card, player) do
     cond do
       player == 0 -> [p1 ++ [card], p2, p3, p4]
@@ -195,6 +215,7 @@ defmodule Rules do
     end
   end
 
+  # Checks if cards not led are valid or not
   def okSuit(hands, [{suit, number} | tail], first, isBroken) do
     player = first
     hand = findHand(player, hands)
@@ -209,11 +230,13 @@ defmodule Rules do
     end
   end
 
+  # Returns a player's hand from the list of all the hands
   def findHand(0, [p1Hand, _p2Hand, _p3Hand, _p4Hand]), do: p1Hand
   def findHand(1, [_p1Hand, p2Hand, _p3Hand, _p4Hand]), do: p2Hand
   def findHand(2, [_p1Hand, _p2Hand, p3Hand, _p4Hand]), do: p3Hand
   def findHand(3, [_p1Hand, _p2Hand, _p3Hand, p4Hand]), do: p4Hand
 
+  # Checks if a hand has cards of a certain suit
   def haveSuit(hand, suit) do
     cond do
       Enum.count(hand, fn {x, _y} -> x == suit end) > 0 -> true
@@ -221,6 +244,7 @@ defmodule Rules do
     end
   end
 
+  # Checks if hearts can be played
   def heartsOk(hand, [{suit, number} | _tail], isBroken) do
     cond do
       isBroken -> {true, true}
@@ -231,6 +255,7 @@ defmodule Rules do
     end
   end
 
+  # Finds the card that takes the trick
   def largestCard([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}]) do
     suit = suit1
 
@@ -244,6 +269,7 @@ defmodule Rules do
     {suit, getAtom(greatest)}
   end
 
+  # Translates atoms to integers for ease of comparisons
   def getNumber(y) do
     map = %{
       :zero => 0,

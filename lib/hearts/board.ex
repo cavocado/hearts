@@ -17,7 +17,10 @@ defmodule Board do
             heart1: 10,
             heart2: 10,
             easy?: false,
-            queen?: false
+            queen?: false,
+            runP2: false,
+            runP3: false,
+            runP4: false
 
   def new() do
     %Board{}
@@ -97,5 +100,17 @@ defmodule Board do
 
   def changeQ(board, value) do
     %Board{board | queen?: value}
+  end
+
+  def changeR2(board, value) do
+    %Board{board | runP2: value}
+  end
+
+  def changeR3(board, value) do
+    %Board{board | runP3: value}
+  end
+
+  def changeR4(board, value) do
+    %Board{board | runP4: value}
   end
 end

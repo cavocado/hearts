@@ -38,6 +38,37 @@ defmodule Computer do
     sList ++ rest
   end
 
+  def run?(hand) do
+    hearts = findHearts(hand)
+    if length(hearts) <= 3 do
+      false
+    else
+      map = %{
+        :two => 2,
+        :three => 3,
+        :four => 4,
+        :five => 5,
+        :six => 6,
+        :seven => 7,
+        :eight => 8,
+        :nine => 9,
+        :ten => 10,
+        :jack => 11,
+        :queen => 12,
+        :king => 13,
+        :ace => 14
+      }
+      heartNums = Enum.map(hearts, fn {_x, y} -> Map.fetch!(map, y) end)
+      if Enum.count(heartNums, fn x -> x < 14 - length(heartNums) end) > 0 do
+        false
+      else
+        true
+      end
+    end
+  end
+
+  def findHearts(hand), do: Enum.filter(hand, fn {x, _y} -> x == :heart end)
+
   def pickCard(board) do
     player = board.p1
     hands = board.hands
