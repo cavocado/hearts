@@ -6,20 +6,25 @@ defmodule Computer do
     diamonds = countSuit(hand, :diamond)
     hearts = countSuit(hand, :heart)
     spades = countSuit(hand, :spade)
+    run? = run(board, player)
     shuffledHand = Enum.shuffle(hand)
-    options = if spades <= 3 do
-      orderList(hand, :spade)
+    options = if run? do
+      filterCards(shuffledHand, true)
     else
-      if diamonds <= 3 do
-        orderList(hand, :diamond)
+      if spades <= 3 do
+        orderList(shuffledHand, :spade)
       else
-        if clubs <= 3 do
-          orderList(hand, :club)
+        if diamonds <= 3 do
+          orderList(shuffledHand, :diamond)
         else
-          if hearts <= 3 do
-            orderList(hand, :heart)
+          if clubs <= 3 do
+            orderList(shuffledHand, :club)
           else
-            shuffledHand
+            if hearts <= 3 do
+              orderList(shuffledHand, :heart)
+            else
+              shuffledHand
+            end
           end
         end
       end
@@ -31,6 +36,10 @@ defmodule Computer do
     card3 = List.first(tHand)
     [card1, card2, card3]
   end
+
+  def run(board, 1), do: board.runP2
+  def run(board, 2), do: board.runP3
+  def run(board, 3), do: board.runP4
 
   def orderList(hand, suit) do
     sList = Enum.filter(hand, fn {x, _y} -> x == suit end)

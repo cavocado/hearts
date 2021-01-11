@@ -72,6 +72,50 @@ defmodule Rules do
           newBoard.heart2
         end
 
+        newRun2 = if board.runP2 and newHeart1 != 10 do
+          if newHeart1 != 1 do
+            false
+          else
+            if newHeart2 != 10 and newHeart2 != 1 do
+              false
+            else
+              board.runP2
+            end
+          end
+        else
+          board.runP2
+        end
+
+        newRun3 = if board.runP3 and newHeart1 != 10 do
+          if newHeart1 != 2 do
+            false
+          else
+            if newHeart2 != 10 and newHeart2 != 2 do
+              false
+            else
+              board.runP3
+            end
+          end
+        else
+          board.runP3
+        end
+
+        newRun4 = if board.runP4 and newHeart1 != 10 do
+          if newHeart1 != 3 do
+            false
+          else
+            if newHeart2 != 10 and newHeart2 != 3 do
+              false
+            else
+              board.runP4
+            end
+          end
+        else
+          board.runP4
+        end
+
+        IO.puts("Run2: o - #{board.runP2} n - #{newRun2}\nRun3: o - #{board.runP3} n - #{newRun3}\nRun4: o - #{board.runP4} n - #{newRun4}\n")
+
         # Updates whether or not the queen of spades has been played
         newQueen? = if Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) == 1 do
           true
@@ -95,6 +139,9 @@ defmodule Rules do
           |> Board.changeH1(newHeart1)
           |> Board.changeH2(newHeart2)
           |> Board.changeQ(newQueen?)
+          |> Board.changeR2(newRun2)
+          |> Board.changeR3(newRun3)
+          |> Board.changeR4(newRun4)
 
         # Checks if the round is over or not; if it is, the new scores are calculated and printed
         if hands == [[], [], [], []] do
