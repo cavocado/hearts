@@ -80,6 +80,16 @@ defmodule Computer do
     diamonds = board.dLeft
     hearts = board.hLeft
 
+    run = if player == 2 do
+      board.runP2
+    else
+      if player == 3 do
+        board.runP3
+      else
+        board.runP4
+      end
+    end
+
     suitLead =
       if playedSoFar == [] do
         :anything
@@ -88,7 +98,7 @@ defmodule Computer do
       end
 
     possiblePlays =
-      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts)
+      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run)
 
     card =
       if haveTwoClubs(hand) do
@@ -121,10 +131,16 @@ defmodule Computer do
 
   def removeSuit(_hand, _suit, _num), do: []
 
-  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, _hearts) do
+  def getNum(hand, spades, diamonds, clubs, hearts) do
     sNum = spades - countSuit(hand, :spade)
     dNum = diamonds - countSuit(hand, :diamond)
     cNum = clubs - countSuit(hand, :club)
+    hNum = hearts - countSuit(hand, :heart)
+    [sNum, dNum, cNum, hNum]
+  end
+
+  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false) do
+    [sNum, dNum, cNum, _hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     removeS = removeSuit(left, :spade, sNum)
     removeD = removeSuit(left, :diamond, dNum)
@@ -146,11 +162,8 @@ defmodule Computer do
     end
   end
 
-  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts) do
-    sNum = spades - countSuit(hand, :spade)
-    dNum = diamonds - countSuit(hand, :diamond)
-    cNum = clubs - countSuit(hand, :club)
-    hNum = hearts - countSuit(hand, :heart)
+  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false) do
+    [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     removeS = removeSuit(hand, :spade, sNum)
     removeD = removeSuit(hand, :diamond, dNum)
     removeC = removeSuit(hand, :club, cNum)
@@ -172,7 +185,7 @@ defmodule Computer do
     end
   end
 
-  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts) do
+  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false) do
     suit? = Rules.haveSuit(hand, suitLead)
 
     current =
@@ -186,10 +199,7 @@ defmodule Computer do
         end
       end
 
-    sNum = spades - countSuit(current, :spade)
-    dNum = diamonds - countSuit(current, :diamond)
-    cNum = clubs - countSuit(current, :club)
-    hNum = hearts - countSuit(current, :heart)
+    [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     removeS = removeSuit(current, :spade, sNum)
     removeD = removeSuit(current, :diamond, dNum)
     removeC = removeSuit(current, :club, cNum)
@@ -209,5 +219,81 @@ defmodule Computer do
         final
       end
     end
+  end
+
+  def findPlays(hand, :anything, isBroken, _p, _spades, _diamonds, _clubs, _hearts, true) do
+    start = if isBroken do
+      hand
+    else
+      Enum.filter(hand, fn {x, _y} -> x != :heart end)
+    end
+
+    filterCards(start, false)
+  end
+
+  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true) do
+    if Rules.haveSuit(hand, suitLead) do
+      newHand = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
+      # filter for biggest cards unless can't beat cards in p
+      filterCards(newHand, false)
+    else
+      newHand = Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end)
+      filterCards(newHand, true)
+    end
+  end
+
+  def filterCards(hand, small_to_big?) do
+    numHand = Enum.map(hand, fn x -> getNewCard(x) end)
+    newHand = Enum.sort(numHand)
+
+    rev = if !small_to_big? do
+      Enum.reverse(newHand)
+    else
+      newHand
+    end
+
+    Enum.map(rev, fn x -> getOldCard(x) end)
+  end
+
+  def getNewCard({x, y}) do
+    map = %{
+      :two => 2,
+      :three => 3,
+      :four => 4,
+      :five => 5,
+      :six => 6,
+      :seven => 7,
+      :eight => 8,
+      :nine => 9,
+      :ten => 10,
+      :jack => 11,
+      :queen => 12,
+      :king => 13,
+      :ace => 14
+    }
+
+    {:ok, num} = Map.fetch(map, y)
+    {num, x}
+  end
+
+  def getOldCard({x, y}) do
+    map2 = %{
+      2 => :two,
+      3 => :three,
+      4 => :four,
+      5 => :five,
+      6 => :six,
+      7 => :seven,
+      8 => :eight,
+      9 => :nine,
+      10 => :ten,
+      11 => :jack,
+      12 => :queen,
+      13 => :king,
+      14 => :ace
+    }
+
+    atom = Map.fetch!(map2, x)
+    {y, atom}
   end
 end

@@ -20,6 +20,7 @@ defmodule Setup do
       |> Board.changeR3(run3)
       |> Board.changeR4(run4)
 
+    # Prints direction of passing
     case rem(currentRoundNumber, 4) do
       0 -> IO.puts("\nPass left this round.")
       1 -> IO.puts("\nPass right this round.")
