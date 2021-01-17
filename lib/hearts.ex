@@ -110,15 +110,23 @@ defmodule Hearts do
   end
 
   def addPassingCards([p1, p2, p3, p4], "right", fromP1, fromP2, fromP3, fromP4) do
+    printPassedCards(fromP2)
     [p1 ++ fromP2, p2 ++ fromP3, p3 ++ fromP4, p4 ++ fromP1]
   end
 
   def addPassingCards([p1, p2, p3, p4], "left", fromP1, fromP2, fromP3, fromP4) do
+    printPassedCards(fromP4)
     [p1 ++ fromP4, p2 ++ fromP1, p3 ++ fromP2, p4 ++ fromP3]
   end
 
   def addPassingCards([p1, p2, p3, p4], "across", fromP1, fromP2, fromP3, fromP4) do
+    printPassedCards(fromP3)
     [p1 ++ fromP3, p2 ++ fromP4, p3 ++ fromP1, p4 ++ fromP2]
+  end
+
+  def printPassedCards(passed) do
+    IO.puts("\nHere are the cards that were passed to you:")
+    IO.puts(IO.ANSI.white_background() <> IO.ANSI.black() <> Player.formatHand(passed, "") <> IO.ANSI.black_background() <> IO.ANSI.white())
   end
 
   def removePassingCards([p1, p2, p3, p4], card1, card2, card3, player) do
