@@ -114,7 +114,7 @@ defmodule Rules do
           board.runP4
         end
 
-        IO.puts("Run2: o - #{board.runP2} n - #{newRun2}\nRun3: o - #{board.runP3} n - #{newRun3}\nRun4: o - #{board.runP4} n - #{newRun4}\n")
+        #IO.puts("Run2: o - #{board.runP2} n - #{newRun2}\nRun3: o - #{board.runP3} n - #{newRun3}\nRun4: o - #{board.runP4} n - #{newRun4}\n")
 
         # Updates whether or not the queen of spades has been played
         newQueen? = if Enum.count(playedSoFar, fn x -> x == {:spade, :queen} end) == 1 do
@@ -266,9 +266,10 @@ defmodule Rules do
   def okSuit(hands, [{suit, number} | tail], first, isBroken) do
     player = first
     hand = findHand(player, hands)
-    {qSuit, _qNumber} = List.last(tail)
+    {qSuit, qNumber} = List.last(tail)
 
     cond do
+      {suit, number} == {:club, :two} and {qSuit, qNumber} == {:spade, :queen} -> {false, isBroken}
       suit == qSuit -> {true, isBroken}
       haveSuit(hand, suit) -> {false, isBroken}
       qSuit != :heart -> {true, isBroken}

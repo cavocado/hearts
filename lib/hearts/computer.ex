@@ -107,7 +107,7 @@ defmodule Computer do
       end
 
     possiblePlays =
-      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run)
+      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run, board.heart1, board.heart2)
 
     card =
       if haveTwoClubs(hand) do
@@ -148,7 +148,7 @@ defmodule Computer do
     [sNum, dNum, cNum, hNum]
   end
 
-  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false) do
+  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2) do
     [sNum, dNum, cNum, _hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     removeS = removeSuit(left, :spade, sNum)
@@ -171,7 +171,7 @@ defmodule Computer do
     end
   end
 
-  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false) do
+  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2) do
     [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     removeS = removeSuit(hand, :spade, sNum)
     removeD = removeSuit(hand, :diamond, dNum)
@@ -194,7 +194,7 @@ defmodule Computer do
     end
   end
 
-  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false) do
+  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false, h1, h2) do
     suit? = Rules.haveSuit(hand, suitLead)
 
     current =
@@ -208,12 +208,16 @@ defmodule Computer do
         end
       end
 
-    [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
-    removeS = removeSuit(current, :spade, sNum)
-    removeD = removeSuit(current, :diamond, dNum)
-    removeC = removeSuit(current, :club, cNum)
-    removeH = removeSuit(current, :heart, hNum)
-    final = (((current -- removeS) -- removeD) -- removeC) -- removeH
+    final = if h1 != 10 and h2 != 10 and !suit? and !haveTwoClubs(p) do
+      Enum.filter(hand, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
+    else
+      [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
+      removeS = removeSuit(current, :spade, sNum)
+      removeD = removeSuit(current, :diamond, dNum)
+      removeC = removeSuit(current, :club, cNum)
+      removeH = removeSuit(current, :heart, hNum)
+      (((current -- removeS) -- removeD) -- removeC) -- removeH
+    end
 
     if final == [] do
       if Rules.getLength(current, 0) > 1 and suit? do
@@ -230,7 +234,7 @@ defmodule Computer do
     end
   end
 
-  def findPlays(hand, :anything, isBroken, _p, _spades, _diamonds, _clubs, _hearts, true) do
+  def findPlays(hand, :anything, isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2) do
     start = if isBroken do
       hand
     else
@@ -240,7 +244,7 @@ defmodule Computer do
     filterCards(start, false)
   end
 
-  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true) do
+  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2) do
     if Rules.haveSuit(hand, suitLead) do
       newHand = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
       # filter for biggest cards unless can't beat cards in p
