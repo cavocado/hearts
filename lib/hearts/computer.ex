@@ -107,7 +107,7 @@ defmodule Computer do
       end
 
     possiblePlays =
-      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run, board.heart1, board.heart2)
+      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run, board.heart1, board.heart2, board.queen?)
 
     card =
       if haveTwoClubs(hand) do
@@ -148,7 +148,25 @@ defmodule Computer do
     [sNum, dNum, cNum, hNum]
   end
 
-  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2) do
+  def deleteSpades(hand, same_suit?, queen?) do
+    if Rules.getLength(hand, 0) > 1 and same_suit? do
+      nList = List.delete(hand, {:spade, :queen})
+      if !queen? and Rules.getLength(nList, 0) > 1 do
+        nList2 = List.delete(nList, {:spade, :king})
+        if Rules.getLength(nList2, 0) > 1 do
+          List.delete(nList2, {:spade, :ace})
+        else
+          nList2
+        end
+      else
+        nList
+      end
+    else
+      hand
+    end
+  end
+
+  def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     [sNum, dNum, cNum, _hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     removeS = removeSuit(left, :spade, sNum)
@@ -157,21 +175,17 @@ defmodule Computer do
     final = ((left -- removeS) -- removeD) -- removeC
 
     if final == [] do
-      if Rules.getLength(left, 0) > 1 do
-        List.delete(left, {:spade, :queen})
+      if left == [] do
+        hand
       else
-        left
+        deleteSpades(left, true, queen?)
       end
     else
-      if Rules.getLength(final, 0) > 1 do
-        List.delete(final, {:spade, :queen})
-      else
-        final
-      end
+      deleteSpades(final, true, queen?)
     end
   end
 
-  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2) do
+  def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     removeS = removeSuit(hand, :spade, sNum)
     removeD = removeSuit(hand, :diamond, dNum)
@@ -180,21 +194,13 @@ defmodule Computer do
     final = (((hand -- removeS) -- removeD) -- removeC) -- removeH
 
     if final == [] do
-      if Rules.getLength(hand, 0) > 1 do
-        List.delete(hand, {:spade, :queen})
-      else
-        hand
-      end
+      deleteSpades(hand, true, queen?)
     else
-      if Rules.getLength(final, 0) > 1 do
-        List.delete(final, {:spade, :queen})
-      else
-        final
-      end
+      deleteSpades(final, true, queen?)
     end
   end
 
-  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false, h1, h2) do
+  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false, h1, h2, queen?) do
     suit? = Rules.haveSuit(hand, suitLead)
 
     current =
@@ -220,21 +226,13 @@ defmodule Computer do
     end
 
     if final == [] do
-      if Rules.getLength(current, 0) > 1 and suit? do
-        List.delete(current, {:spade, :queen})
-      else
-        current
-      end
+      deleteSpades(current, suit?, queen?)
     else
-      if Rules.getLength(final, 0) > 1 and suit? do
-        List.delete(final, {:spade, :queen})
-      else
-        final
-      end
+      deleteSpades(final, suit?, queen?)
     end
   end
 
-  def findPlays(hand, :anything, isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2) do
+  def findPlays(hand, :anything, isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2, _q) do
     start = if isBroken do
       hand
     else
@@ -244,7 +242,7 @@ defmodule Computer do
     filterCards(start, false)
   end
 
-  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2) do
+  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2, _q) do
     if Rules.haveSuit(hand, suitLead) do
       newHand = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
       # filter for biggest cards unless can't beat cards in p
