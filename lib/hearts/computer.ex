@@ -140,12 +140,16 @@ defmodule Computer do
 
   def removeSuit(_hand, _suit, _num), do: []
 
-  def getNum(hand, spades, diamonds, clubs, hearts) do
+  def filterSuits(hand, spades, diamonds, clubs, hearts) do
     sNum = spades - countSuit(hand, :spade)
     dNum = diamonds - countSuit(hand, :diamond)
     cNum = clubs - countSuit(hand, :club)
     hNum = hearts - countSuit(hand, :heart)
-    [sNum, dNum, cNum, hNum]
+    removeS = removeSuit(hand, :spade, sNum)
+    removeD = removeSuit(hand, :diamond, dNum)
+    removeC = removeSuit(hand, :club, cNum)
+    removeH = removeSuit(hand, :heart, hNum)
+    (((hand -- removeS) -- removeD) -- removeC) -- removeH
   end
 
   def deleteSpades(hand, same_suit?, queen?) do
@@ -167,12 +171,8 @@ defmodule Computer do
   end
 
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
-    [sNum, dNum, cNum, _hNum] = getNum(hand, spades, diamonds, clubs, hearts)
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
-    removeS = removeSuit(left, :spade, sNum)
-    removeD = removeSuit(left, :diamond, dNum)
-    removeC = removeSuit(left, :club, cNum)
-    final = ((left -- removeS) -- removeD) -- removeC
+    final = filterSuits(left, spades, diamonds, clubs, hearts)
 
     if final == [] do
       if left == [] do
@@ -186,12 +186,7 @@ defmodule Computer do
   end
 
   def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
-    [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
-    removeS = removeSuit(hand, :spade, sNum)
-    removeD = removeSuit(hand, :diamond, dNum)
-    removeC = removeSuit(hand, :club, cNum)
-    removeH = removeSuit(hand, :heart, hNum)
-    final = (((hand -- removeS) -- removeD) -- removeC) -- removeH
+    final = filterSuits(hand, spades, diamonds, clubs, hearts)
 
     if final == [] do
       deleteSpades(hand, true, queen?)
@@ -215,14 +210,9 @@ defmodule Computer do
       end
 
     final = if h1 != 10 and h2 != 10 and !suit? and !haveTwoClubs(p) do
-      Enum.filter(hand, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
+      Enum.filter(current, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
     else
-      [sNum, dNum, cNum, hNum] = getNum(hand, spades, diamonds, clubs, hearts)
-      removeS = removeSuit(current, :spade, sNum)
-      removeD = removeSuit(current, :diamond, dNum)
-      removeC = removeSuit(current, :club, cNum)
-      removeH = removeSuit(current, :heart, hNum)
-      (((current -- removeS) -- removeD) -- removeC) -- removeH
+      filterSuits(current, spades, diamonds, clubs, hearts)
     end
 
     if final == [] do
