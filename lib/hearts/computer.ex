@@ -172,30 +172,26 @@ defmodule Computer do
 
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
-    final = filterSuits(left, spades, diamonds, clubs, hearts)
+    final = deleteSpades(left, true, queen?)
 
-    if final == [] do
-      if left == [] do
-        hand
-      else
-        deleteSpades(left, true, queen?)
-      end
+    if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
+      filterSuits(final, spades, diamonds, clubs, hearts)
     else
-      deleteSpades(final, true, queen?)
+      final
     end
   end
 
   def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
-    final = filterSuits(hand, spades, diamonds, clubs, hearts)
+    final = deleteSpades(hand, true, queen?)
 
-    if final == [] do
-      deleteSpades(hand, true, queen?)
+    if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
+      filterSuits(final, spades, diamonds, clubs, hearts)
     else
-      deleteSpades(final, true, queen?)
+      final
     end
   end
 
-  def findPlays(hand, suitLead, _isBroken, p, spades, diamonds, clubs, hearts, false, h1, h2, queen?) do
+  def findPlays(hand, suitLead, _isBroken, p, _spades, _diamonds, _clubs, _hearts, false, h1, h2, queen?) do
     suit? = Rules.haveSuit(hand, suitLead)
 
     current =
@@ -212,13 +208,13 @@ defmodule Computer do
     final = if h1 != 10 and h2 != 10 and !suit? and !haveTwoClubs(p) do
       Enum.filter(current, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
     else
-      filterSuits(current, spades, diamonds, clubs, hearts)
+      deleteSpades(current, suit?, queen?)
     end
 
     if final == [] do
-      deleteSpades(current, suit?, queen?)
+      current
     else
-      deleteSpades(final, suit?, queen?)
+      final
     end
   end
 
