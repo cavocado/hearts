@@ -14,6 +14,11 @@ defmodule Hearts do
   """
 
   def run() do
+
+    IO.puts("--------------------------------------------------------------------------")
+    IO.puts("|                           Welcome to Hearts!                           |")
+    IO.puts("--------------------------------------------------------------------------")
+
     answer =
       IO.gets("Would you like to have the card count (easier) or not (harder)? (yes/no) ")
       |> String.trim()

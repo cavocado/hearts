@@ -28,7 +28,7 @@ defmodule Player do
       if isInHand(p1, newCard) do
         newCard
       else
-        IO.puts("Invalid choice")
+        IO.puts("Invalid choice - try something like 'clubs 10' or 'diamonds queen' which is in your hand")
         getPassingCard(p1)
       end
     end
@@ -125,7 +125,7 @@ defmodule Player do
     card = {suit, number}
 
     if suit == false || number == false do
-      IO.puts("Not a valid input. Try again.")
+      IO.puts("Not a valid input. Try again. - try something like 'clubs 10' or 'diamonds queen'")
       playCard(board)
     else
       if isInHand(hand, card) do
@@ -133,7 +133,7 @@ defmodule Player do
         newHands = removeCard(hands, card, p1)
         Board.changeP(board, newPlayedSoFar) |> Board.changeH(newHands)
       else
-        IO.puts("You can't play that card.")
+        IO.puts("You can't play that card - Please pick a card from your hand")
         playCard(board)
       end
     end

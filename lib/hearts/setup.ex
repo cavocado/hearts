@@ -22,10 +22,10 @@ defmodule Setup do
 
     # Prints direction of passing
     case rem(currentRoundNumber, 4) do
-      0 -> IO.puts("\nPass left this round.")
-      1 -> IO.puts("\nPass right this round.")
-      2 -> IO.puts("\nPass across this round.")
-      3 -> IO.puts("\nThis is a hold hand.")
+      0 -> IO.puts("\nPass left this round (Pass to player 2, receive from player 4)")
+      1 -> IO.puts("\nPass right this round (Pass to player 4, receive from player 2)")
+      2 -> IO.puts("\nPass across this round (Pass to player 3, receive from player 3)")
+      3 -> IO.puts("\nThis is a hold hand")
     end
 
     # Checks if the card count should be displayed or not
