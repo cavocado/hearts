@@ -214,7 +214,14 @@ defmodule Computer do
     Enum.map(newHand, fn x -> Setup.getAtom(x) end)
   end
 
-  def playLittleSpades?(hand, true), do: hand
+  def playLittleSpades?(hand, true) do
+    if Enum.filter(hand, fn {x, _y} -> x != :spade end) == [] do
+      hand
+    else
+      Enum.filter(hand, fn {x, _y} -> x != :spade end)
+    end
+  end
+
   def playLittleSpades?(hand, false) do
     if Enum.count(hand, fn x -> x == {:spade, :king} or x == {:spade, :ace} or x == {:spade, :queen} end) == 0 and countSuit(hand, :spade) > 0 do
       Enum.filter(hand, fn {x, _y} -> x == :spade end)
@@ -232,7 +239,11 @@ defmodule Computer do
     if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
       filterSuits(final, spades, diamonds, clubs, hearts)
     else
-      final
+      if final == [] do
+        hand
+      else
+        final
+      end
     end
   end
 
@@ -293,7 +304,11 @@ defmodule Computer do
     start = if isBroken do
       hand
     else
-      Enum.filter(hand, fn {x, _y} -> x != :heart end)
+      if Enum.count(hand, fn {x, _y} -> x != :heart end) == 0 do
+        hand
+      else
+        Enum.filter(hand, fn {x, _y} -> x != :heart end)
+      end
     end
 
     filterCards(start, false)
