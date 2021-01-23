@@ -204,6 +204,16 @@ defmodule Computer do
     end
   end
 
+  def deleteLargeHearts(hand, number) do
+    numHand = Enum.map(hand, fn x -> Setup.getNumber(x) end)
+    newHand = if Enum.filter(numHand, fn {x, y} -> x != :heart or y < number end) == [] do
+      numHand
+    else
+      Enum.filter(numHand, fn {x, y} -> x != :heart or y < number end)
+    end
+    Enum.map(newHand, fn x -> Setup.getAtom(x) end)
+  end
+
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     final = deleteSpades(left, true, queen?)
@@ -217,6 +227,7 @@ defmodule Computer do
 
   def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     final = deleteSpades(hand, true, queen?)
+    |> deleteLargeHearts(10)
 
     if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
       filterSuits(final, spades, diamonds, clubs, hearts)
@@ -230,7 +241,13 @@ defmodule Computer do
 
     current =
       if suit? do
-        Enum.filter(hand, fn {x, _y} -> x == suitLead end)
+        newH = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
+        if suitLead == :heart do
+          {_s, num} = Rules.largestCard(p)
+          deleteLargeHearts(newH, num)
+        else
+          newH
+        end
       else
         if haveTwoClubs(p) do
           Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end)

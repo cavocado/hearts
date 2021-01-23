@@ -47,7 +47,7 @@ defmodule Player do
     Each other person has to play a club as well unless they don't have any in which case they would
     throw off a card other than a heart or the queen of spades (only a first trick rule).
     The person who played the highest card in the suit led wins the trick and leads for the next trick
-    to repeat the process (doesn't have to lead clubs).
+    to repeat the process (they don't have to lead clubs).
 
     Hearts can't be led until someone throws off a heart or the queen of spades has been played.
     The process above repeats until all of the cards have been played.
@@ -56,7 +56,7 @@ defmodule Player do
     queen of spades adds 13 to the number of hearts they took. Then, they add the values to the scores
     they had previously. If someone took all the hearts and the queen of spades, then they have a choice
     to either take 26 away from their score or add 26 to all the other players' scores (in my game, 26 is
-    added to all the other scores).
+    added to all other scores).
 
     Rounds are played until a player's score is greater than or equal to 100. The person with the lowest
     score wins the game.
