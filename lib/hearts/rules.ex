@@ -55,7 +55,7 @@ defmodule Rules do
         # Prints the numbers left if requested by the player
         if newBoard.easy? == true do
           IO.puts(
-            "left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
+            "cards left: clubs #{clubs}, diamonds #{diamonds}, hearts #{hearts}, spades #{spades}\n"
           )
         end
 
@@ -147,7 +147,7 @@ defmodule Rules do
         if hands == [[], [], [], []] do
           scores = board.scores
           IO.puts("The new scores are ")
-          IO.inspect(newScores(newTricks, scores))
+          printScores(newScores(newTricks, scores))
 
           Board.changeS(nextBoard, newScores(newTricks, scores))
           |> Board.changeRO(true)
@@ -156,6 +156,13 @@ defmodule Rules do
         end
       end
     end
+  end
+
+  def printScores([p1, p2, p3, p4]) do
+    IO.puts("Player 1: #{p1}")
+    IO.puts("Player 2: #{p2}")
+    IO.puts("Player 3: #{p3}")
+    IO.puts("Player 4: #{p4}")
   end
 
   # Subtracts the number of each suit that was played in a trick from the number of each suit left

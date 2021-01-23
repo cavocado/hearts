@@ -99,18 +99,13 @@ defmodule Player do
     IO.puts("\nIt's player #{p1 + 1}'s turn.")
 
     if Enum.count(playedSoFar) > 0 do
+      playerOrder = getOrder(Enum.count(playedSoFar), p1, [])
       IO.puts(
         IO.ANSI.black_background() <>
           IO.ANSI.white() <>
-          "Here are the cards that have been played already" <>
-          IO.ANSI.black_background() <> IO.ANSI.white()
+          "Here are the cards that have been played already"
       )
-
-      IO.puts(
-        IO.ANSI.white_background() <>
-          IO.ANSI.black() <>
-          formatHand(playedSoFar, "") <> IO.ANSI.black_background() <> IO.ANSI.white()
-      )
+      printPlayedSoFar(playedSoFar, playerOrder)
     end
 
     hand = getHand(hands, p1)
@@ -137,6 +132,23 @@ defmodule Player do
         playCard(board)
       end
     end
+  end
+
+  def getOrder(0, _l, currentList), do: currentList
+  def getOrder(length, lastP, currentList) do
+    player = rem(lastP + 3, 4)
+    getOrder(length - 1, player, [player | currentList])
+  end
+
+  def printPlayedSoFar([card], [player]) do
+    IO.puts("Player #{player + 1} played:")
+    Rules.printCard(card)
+  end
+
+  def printPlayedSoFar([card | tail], [player | pTail]) do
+    IO.puts("Player #{player + 1} played:")
+    Rules.printCard(card)
+    printPlayedSoFar(tail, pTail)
   end
 
   def removeCard([p1, p2, p3, p4], card, player) do

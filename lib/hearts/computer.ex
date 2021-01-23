@@ -216,7 +216,7 @@ defmodule Computer do
 
   def playLittleSpades?(hand, true), do: hand
   def playLittleSpades?(hand, false) do
-    if Enum.count(hand, fn x -> x == {:spade, :king} or x == {:spade, :ace} end) == 0 do
+    if Enum.count(hand, fn x -> x == {:spade, :king} or x == {:spade, :ace} or x == {:spade, :queen} end) == 0 and countSuit(hand, :spade) > 0 do
       Enum.filter(hand, fn {x, _y} -> x == :spade end)
     else
       hand
