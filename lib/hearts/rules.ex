@@ -304,11 +304,11 @@ defmodule Rules do
   end
 
   # Finds the card that takes the trick
-  def largestCard([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}]) do
-    suit = suit1
+  def largestCard(cards) do
+    {suit, _num} = List.first(cards)
 
     numbers =
-      Enum.map([{suit1, number1}, {suit2, number2}, {suit3, number3}, {suit4, number4}], fn {x, y} ->
+      Enum.map(cards, fn {x, y} ->
         checkSuit(x, y, suit)
       end)
 

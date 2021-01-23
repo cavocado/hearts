@@ -170,6 +170,40 @@ defmodule Computer do
     end
   end
 
+  def findSuits(hand, hearts) do
+    spades = countSuit(hand, :spade) > 5
+    diamonds = countSuit(hand, :diamond) > 5
+    clubs = countSuit(hand, :club) > 5
+    nHand = if !hearts do
+      noHearts = Enum.filter(hand, fn {x, _y} -> x != :heart end)
+      if length(noHearts) > 1 do
+        Enum.filter(noHearts, fn x -> x != {:spade, :queen} end)
+      else
+        noHearts
+      end
+    else
+      hand
+    end
+
+    sHand = if !spades and countSuit(nHand, :spade) < length(nHand) do
+      Enum.filter(nHand, fn {x, _y} -> x != :spade end)
+    else
+      nHand
+    end
+
+    dHand = if !diamonds and countSuit(sHand, :diamond) < length(sHand) do
+      Enum.filter(sHand, fn {x, _y} -> x != :diamond end)
+    else
+      sHand
+    end
+
+    if !clubs and countSuit(dHand, :club) < length(dHand) do
+      Enum.filter(dHand, fn {x, _y} -> x != :club end)
+    else
+      dHand
+    end
+  end
+
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     final = deleteSpades(left, true, queen?)
@@ -208,7 +242,15 @@ defmodule Computer do
     final = if h1 != 10 and h2 != 10 and !suit? and !haveTwoClubs(p) do
       Enum.filter(current, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
     else
-      deleteSpades(current, suit?, queen?)
+      if !suit? do
+        if !haveTwoClubs(p) do
+          findSuits(current, false)
+        else
+          findSuits(current, true)
+        end
+      else
+        deleteSpades(current, suit?, queen?)
+      end
     end
 
     if final == [] do
@@ -228,11 +270,16 @@ defmodule Computer do
     filterCards(start, false)
   end
 
-  def findPlays(hand, suitLead, _isBroken, _p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2, _q) do
+  def findPlays(hand, suitLead, _isBroken, p, _spades, _diamonds, _clubs, _hearts, true, _h1, _h2, _q) do
     if Rules.haveSuit(hand, suitLead) do
       newHand = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
-      # filter for biggest cards unless can't beat cards in p
-      filterCards(newHand, false)
+      [{_s, lH} | _tail] = filterCards(newHand, false)
+      {_sp, lP} = Rules.largestCard(p)
+      if lH < lP do
+        filterCards(newHand, true)
+      else
+        filterCards(newHand, false)
+      end
     else
       newHand = Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end)
       filterCards(newHand, true)
