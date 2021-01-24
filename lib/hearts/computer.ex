@@ -289,13 +289,22 @@ defmodule Computer do
           {_s, num} = Rules.largestCard(p)
           deleteLargeHearts(newH, num)
         else
-          newH
+          if haveTwoClubs(p) do
+            filterCards(newH, false)
+          else
+            newH
+          end
         end
       else
         if haveTwoClubs(p) do
           Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end)
         else
-          hand
+          if Enum.count(hand, fn x -> x == {:spade, :queen} end) == 1 do
+            noQueen = List.delete(hand, {:spade, :queen})
+            [{:spade, :queen} | noQueen]
+          else
+            hand
+          end
         end
       end
 
