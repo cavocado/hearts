@@ -127,13 +127,13 @@ defmodule Computer do
       end
 
     possiblePlays =
-      findPlays(hand, suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run, board.heart1, board.heart2, board.queen?)
+      findPlays(Enum.shuffle(hand), suitLead, isBroken, playedSoFar, spades, diamonds, clubs, hearts, run, board.heart1, board.heart2, board.queen?)
 
     card =
       if haveTwoClubs(hand) do
         {:club, :two}
       else
-        Enum.shuffle(possiblePlays) |> List.first()
+        List.first(possiblePlays)
       end
 
     newHands = Player.removeCard(hands, card, player)
@@ -206,7 +206,7 @@ defmodule Computer do
     end
 
     sHand = if !spades and countSuit(nHand, :spade) < length(nHand) do
-      Enum.filter(nHand, fn {x, _y} -> x != :spade end)
+      Enum.filter(nHand, fn {x, y} -> x != :spade or {x, y} == {:spade, :queen} end)
     else
       nHand
     end
@@ -309,11 +309,23 @@ defmodule Computer do
       end
 
     final = if h1 != 10 and h2 != 10 and !suit? and !haveTwoClubs(p) do
-      Enum.filter(current, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
+      start = Enum.filter(current, fn {x, y} -> x == :heart or (x == :spade and y == :queen) end)
+      if Enum.count(start, fn x -> x == {:spade, :queen} end) == 1 do
+        noQueen = List.delete(start, {:spade, :queen})
+        [{:spade, :queen} | noQueen]
+      else
+        hand
+      end
     else
       if !suit? do
         if !haveTwoClubs(p) do
-          findSuits(current, false)
+          start = findSuits(current, false)
+          if Enum.count(start, fn x -> x == {:spade, :queen} end) == 1 do
+            noQueen = List.delete(start, {:spade, :queen})
+            [{:spade, :queen} | noQueen]
+          else
+            hand
+          end
         else
           findSuits(current, true)
         end
@@ -322,10 +334,17 @@ defmodule Computer do
       end
     end
 
-    if final == [] do
+    result = if final == [] do
       current
     else
       final
+    end
+
+    if !suit? and !haveTwoClubs(p) and Enum.count(result, fn x -> x == {:spade, :queen} end) == 1 do
+      noQueen = List.delete(result, {:spade, :queen})
+      [{:spade, :queen} | noQueen]
+    else
+      result
     end
   end
 
