@@ -39,8 +39,14 @@ defmodule Computer do
     end
 
     numOptions = Enum.map(options, fn x -> Setup.getNumber(x) end)
-    newOptions = Enum.filter(numOptions, fn {x, y} -> (x != :spade) or (y >= 12) end)
-    IO.inspect(newOptions)
+    |> Enum.filter(fn {x, y} -> (x != :spade) or (y >= 12) end)
+    newOptions = if Enum.count(numOptions, fn {x, y} -> x == :heart and y < 8 end) > 0 and !run? do
+      hOptions = Enum.filter(numOptions, fn {x, y} -> x == :heart and y < 8 end)
+      choice = List.first(hOptions)
+      [choice | List.delete(numOptions, choice)]
+    else
+      numOptions
+    end
     finalOptions = Enum.map(newOptions, fn x -> Setup.getAtom(x) end)
 
     card1 = List.first(finalOptions)
