@@ -9,16 +9,24 @@ defmodule Computer do
     run? = run(board, player)
     shuffledHand = Enum.shuffle(hand)
     options = if run? do
-      filterCards(shuffledHand, true)
+      if hearts > 5 do
+        noHearts = Enum.filter(shuffledHand, fn {x, _y} -> x != :heart end)
+        filterCards(noHearts, true)
+      else
+        filterCards(shuffledHand, true)
+      end
     else
-      if spades <= 3 do
-        orderList(shuffledHand, :spade)
+      if spades <= 3 and Enum.count(shuffledHand, fn x -> x == {:spade, :queen} end) == 1 do
+        noQueen = Enum.filter(shuffledHand, fn x -> x != {:spade, :queen} end)
+        [{:spade, :queen} | noQueen]
       else
         if diamonds <= 3 do
           orderList(shuffledHand, :diamond)
         else
-          if clubs <= 3 do
-            orderList(shuffledHand, :club)
+          if clubs <= 4 do
+            newList = orderList(shuffledHand, :club)
+            first = List.first(newList)
+            List.delete(newList, first)
           else
             if hearts <= 3 do
               orderList(shuffledHand, :heart)
@@ -29,8 +37,14 @@ defmodule Computer do
         end
       end
     end
-    card1 = List.first(options)
-    nHand = List.delete(options, card1)
+
+    numOptions = Enum.map(options, fn x -> Setup.getNumber(x) end)
+    newOptions = Enum.filter(numOptions, fn {x, y} -> (x != :spade) or (y >= 12) end)
+    IO.inspect(newOptions)
+    finalOptions = Enum.map(newOptions, fn x -> Setup.getAtom(x) end)
+
+    card1 = List.first(finalOptions)
+    nHand = List.delete(finalOptions, card1)
     card2 = List.first(nHand)
     tHand = List.delete(nHand, card2)
     card3 = List.first(tHand)
