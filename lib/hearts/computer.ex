@@ -172,9 +172,13 @@ defmodule Computer do
     (((hand -- removeS) -- removeD) -- removeC) -- removeH
   end
 
-  def deleteSpades(hand, same_suit?, queen?) do
+  def deleteSpades(hand, same_suit?, queen?, delete?) do
     if Rules.getLength(hand, 0) > 1 and same_suit? do
-      nList = List.delete(hand, {:spade, :queen})
+      nList = if delete? do
+        List.delete(hand, {:spade, :queen})
+      else
+        hand
+      end
       if !queen? and Rules.getLength(nList, 0) > 1 do
         nList2 = List.delete(nList, {:spade, :king})
         if Rules.getLength(nList2, 0) > 1 do
@@ -253,7 +257,7 @@ defmodule Computer do
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     final = playLittleSpades?(left, queen?)
-      |> deleteSpades(true, queen?)
+      |> deleteSpades(true, queen?, true)
 
 
     if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
@@ -269,7 +273,7 @@ defmodule Computer do
 
   def findPlays(hand, :anything, true, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     final = playLittleSpades?(hand, queen?)
-    |> deleteSpades(true, queen?)
+    |> deleteSpades(true, queen?, true)
     |> deleteLargeHearts(10)
 
     if filterSuits(final, spades, diamonds, clubs, hearts) != [] do
@@ -282,28 +286,33 @@ defmodule Computer do
   def findPlays(hand, suitLead, _isBroken, p, _spades, _diamonds, _clubs, _hearts, false, h1, h2, queen?) do
     suit? = Rules.haveSuit(hand, suitLead)
 
-    current =
+    {current, deleteQueen} =
       if suit? do
         newH = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
         if suitLead == :heart do
           {_s, num} = Rules.largestCard(p)
-          deleteLargeHearts(newH, num)
+          {deleteLargeHearts(newH, num), true}
         else
           if haveTwoClubs(p) do
-            filterCards(newH, false)
+            {filterCards(newH, false), true}
           else
-            newH
+            if suitLead == :spade and Enum.count(hand, fn x -> x == {:spade, :queen} end) == 1 and Enum.count(p, fn x -> x == {:spade, :king} or x == {:spade, :queen} end) > 0 do
+              noQueen = List.delete(hand, {:spade, :queen})
+              {[{:spade, :queen} | noQueen], false}
+            else
+              {newH, true}
+            end
           end
         end
       else
         if haveTwoClubs(p) do
-          Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end)
+          {Enum.filter(hand, fn {x, y} -> x != :heart and {x, y} != {:spade, :queen} end), false}
         else
           if Enum.count(hand, fn x -> x == {:spade, :queen} end) == 1 do
             noQueen = List.delete(hand, {:spade, :queen})
-            [{:spade, :queen} | noQueen]
+            {[{:spade, :queen} | noQueen], false}
           else
-            hand
+            {hand, false}
           end
         end
       end
@@ -330,7 +339,7 @@ defmodule Computer do
           findSuits(current, true)
         end
       else
-        deleteSpades(current, suit?, queen?)
+        deleteSpades(current, suit?, queen?, deleteQueen)
       end
     end
 
