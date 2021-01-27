@@ -4,12 +4,6 @@ A version of the hearts card game where players are trying to take the least num
 
 # Starting the Game
 
-To start the game, run:
-'''bash
-iex -S mix
-'''
+To start the game, run: iex -S mix
 
-If the game doesn't start immediately, type: 
-'''elixir
-Hearts.run()
-'''
+If the game doesn't start immediately, type: Hearts.run()
