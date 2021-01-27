@@ -254,6 +254,26 @@ defmodule Computer do
     end
   end
 
+  def deleteLargeCards(hand, suit, number, p) do
+    check = if Enum.count(p, fn x -> x == {:spade, :queen} end) == 1 do
+      numHand = Enum.map(hand, fn x -> Setup.getNumber(x) end)
+      newHand = if Enum.filter(numHand, fn {x, y} -> x != suit or y < number end) == [] do
+        numHand
+      else
+        Enum.filter(numHand, fn {x, y} -> x != suit or y < number end)
+      end
+      Enum.map(newHand, fn x -> Setup.getAtom(x) end)
+    else
+      hand
+    end
+
+    if check == [] do
+      hand
+    else
+      check
+    end
+  end
+
   def findPlays(hand, :anything, false, _p, spades, diamonds, clubs, hearts, false, _h1, _h2, queen?) do
     left = Enum.filter(hand, fn {x, _y} -> x != :heart end)
     final = playLittleSpades?(left, queen?)
@@ -289,18 +309,20 @@ defmodule Computer do
     {current, deleteQueen} =
       if suit? do
         newH = Enum.filter(hand, fn {x, _y} -> x == suitLead end)
+        {_s, lNum} = Rules.largestCard(p)
+        nextH = deleteLargeCards(newH, suitLead, lNum, p)
         if suitLead == :heart do
           {_s, num} = Rules.largestCard(p)
-          {deleteLargeHearts(newH, num), true}
+          {deleteLargeHearts(nextH, num), true}
         else
           if haveTwoClubs(p) do
-            {filterCards(newH, false), true}
+            {filterCards(nextH, false), true}
           else
-            if suitLead == :spade and Enum.count(hand, fn x -> x == {:spade, :queen} end) == 1 and Enum.count(p, fn x -> x == {:spade, :king} or x == {:spade, :queen} end) > 0 do
-              noQueen = List.delete(hand, {:spade, :queen})
+            if suitLead == :spade and Enum.count(nextH, fn x -> x == {:spade, :queen} end) == 1 and Enum.count(p, fn x -> x == {:spade, :king} or x == {:spade, :queen} end) > 0 do
+              noQueen = List.delete(nextH, {:spade, :queen})
               {[{:spade, :queen} | noQueen], false}
             else
-              {newH, true}
+              {nextH, true}
             end
           end
         end
